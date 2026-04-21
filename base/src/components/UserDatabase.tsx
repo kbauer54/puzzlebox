@@ -8,10 +8,10 @@ export type User = {
 
 // Mock database for users
 const mockUsers: User[] = [
-  { uid: 1, name: "Alice", score: 1200, isBanned: false },
-  { uid: 2, name: "Bob", score: 950, isBanned: false },
-  { uid: 3, name: "Charlie", score: 1500, isBanned: false },
-  { uid: 4, name: "Diana", score: 1100, isBanned: false },
+  { uid: 1, name: "a", score: 1200, isBanned: false },
+  { uid: 2, name: "b", score: 950, isBanned: false },
+  { uid: 3, name: "c", score: 1500, isBanned: false },
+  { uid: 4, name: "d", score: 1100, isBanned: false },
 ];
 
 const getNextId = (): number => {
