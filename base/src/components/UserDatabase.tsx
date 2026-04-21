@@ -34,7 +34,7 @@ const mockPuzzles:  Puzzle[] = [
 
 // Database for user scores for different games
 const mockLeaderboard: Entry[] = [
-  { eid: 1, uid: 1, pid: 1, 2 },
+  { eid: 1, uid: 1, pid: 1, score: 2 },
 ];
 
    
