@@ -1,47 +1,33 @@
 import { useState } from 'react';
+import { getTopUsers } from './LeaderboardDatabase';
+import type { TimeFrame } from './LeaderboardDatabase';
 import type { User } from '../App';
 
 interface LeaderboardPageProps {
   user: User | null;
 }
 
-const DATA = {
-  alltime: [
-    { rank: 1, name: 'CryptoKnight',  puzzles: 247, score: 12400 },
-    { rank: 2, name: 'WordWizard_88', puzzles: 198, score: 9800  },
-    { rank: 3, name: 'LogicLord',     puzzles: 183, score: 8700  },
-    { rank: 4, name: 'SilentSolver',  puzzles: 142, score: 7400  },
-    { rank: 5, name: 'Enigmatix',     puzzles: 118, score: 6800  },
-    { rank: 6, name: 'NightOwl',      puzzles: 97,  score: 5200  },
-    { rank: 7, name: 'PuzzlePro',     puzzles: 84,  score: 4600  },
-  ],
-  week: [
-    { rank: 1, name: 'WordWizard_88', puzzles: 18, score: 940 },
-    { rank: 2, name: 'Enigmatix',     puzzles: 14, score: 820 },
-    { rank: 3, name: 'CipherBreaker', puzzles: 12, score: 710 },
-    { rank: 4, name: 'LogicLord',     puzzles: 10, score: 650 },
-    { rank: 5, name: 'NightOwl',      puzzles: 8,  score: 580 },
-  ],
-  today: [
-    { rank: 1, name: 'Enigmatix',    puzzles: 3, score: 245 },
-    { rank: 2, name: 'CryptoKnight', puzzles: 2, score: 180 },
-    { rank: 3, name: 'NightOwl',     puzzles: 2, score: 140 },
-  ],
-};
+type GameFilter = 'wordle' | 'connections' | 'trivia';
 
-type TabKey = 'alltime' | 'week' | 'today';
+const GAME_FILTERS: { key: GameFilter; label: string }[] = [
+  { key: 'wordle',      label: 'Wordle'      },
+  { key: 'connections', label: 'Connections' },
+  { key: 'trivia',      label: 'Trivia'      },
+];
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: 'alltime', label: 'All Time'   },
-  { key: 'week',    label: 'This Week'  },
-  { key: 'today',   label: 'Today'      },
+const TIME_FILTERS: { key: TimeFrame; label: string }[] = [
+  { key: 'alltime', label: 'All Time'  },
+  { key: 'week',    label: 'This Week' },
+  { key: 'today',   label: 'Today'     },
 ];
 
 const RANK_MEDALS: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
 export default function LeaderboardPage({ user }: LeaderboardPageProps) {
-  const [tab, setTab] = useState<TabKey>('alltime');
-  const rows = DATA[tab];
+  const [game, setGame]         = useState<GameFilter>('wordle');
+  const [timeFrame, setTimeFrame] = useState<TimeFrame>('alltime');
+
+  const rows = getTopUsers(game, timeFrame, 20);
 
   return (
     <main style={s.page} className="fade-up">
@@ -50,20 +36,20 @@ export default function LeaderboardPage({ user }: LeaderboardPageProps) {
         <div style={s.titleUnderline} />
       </div>
 
-      {/* Tab chips */}
-      <div style={s.tabRow}>
-        {TABS.map(t => (
-          <button
-            key={t.key}
-            style={{
-              ...s.chip,
-              background: tab === t.key ? 'rgba(200,168,75,0.1)' : 'var(--surface2)',
-              border:     tab === t.key ? '1px solid var(--yellow)' : '1px solid var(--border)',
-              color:      tab === t.key ? 'var(--yellow)' : 'var(--text-muted)',
-            }}
-            onClick={() => setTab(t.key)}
-          >
-            {t.label}
+      {/* Game filter */}
+      <div style={{ ...s.filterRow, marginBottom: 12 }}>
+        {GAME_FILTERS.map(f => (
+          <button key={f.key} style={chip(game === f.key)} onClick={() => setGame(f.key)}>
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Time filter */}
+      <div style={{ ...s.filterRow, marginBottom: 24 }}>
+        {TIME_FILTERS.map(f => (
+          <button key={f.key} style={chip(timeFrame === f.key)} onClick={() => setTimeFrame(f.key)}>
+            {f.label}
           </button>
         ))}
       </div>
@@ -74,48 +60,87 @@ export default function LeaderboardPage({ user }: LeaderboardPageProps) {
         <div style={s.tableHeader}>
           <div style={{ ...s.colRank,  ...s.headerText }}>#</div>
           <div style={{ ...s.colName,  ...s.headerText }}>Player</div>
-          <div style={{ ...s.colNum,   ...s.headerText }}>Puzzles</div>
           <div style={{ ...s.colScore, ...s.headerText }}>Score</div>
         </div>
 
-        {rows.map((row, i) => {
-          const isMe    = user?.name === row.name;
-          const isTop3  = row.rank <= 3;
-          const isLast  = i === rows.length - 1;
+        {rows.length === 0 ? (
+          <div style={s.empty}>
+            <p style={{ fontSize: 15, color: 'var(--text-dim)', marginBottom: 6 }}>
+              No rankings yet available.
+            </p>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+              Be the first to play and set the record!
+            </p>
+          </div>
+        ) : (
+          rows.map((row, i) => {
+            const isMe   = user?.name === row.userName;
+            const isTop3 = row.rank <= 3;
+            const isLast = i === rows.length - 1;
 
-          return (
-            <div
-              key={row.rank}
-              style={{
-                ...s.tableRow,
-                borderBottom: isLast ? 'none' : '1px solid var(--border)',
-                background:   isMe   ? 'rgba(200,168,75,0.06)' : 'transparent',
-                borderRadius: isMe   ? 6 : 0,
-              }}
-            >
-              <div style={{ ...s.colRank, fontSize: 14, color: isTop3 ? 'var(--yellow)' : 'var(--text-muted)', fontWeight: isTop3 ? 700 : 400 }}>
-                {RANK_MEDALS[row.rank] ?? row.rank}
+            return (
+              <div
+                key={row.scoreId}
+                style={{
+                  ...s.tableRow,
+                  borderBottom: isLast ? 'none' : '1px solid var(--border)',
+                  background:   isMe   ? 'rgba(200,168,75,0.06)' : 'transparent',
+                  borderRadius: isMe   ? 6 : 0,
+                }}
+              >
+                <div style={{
+                  ...s.colRank,
+                  fontSize: 14,
+                  color: isTop3 ? 'var(--yellow)' : 'var(--text-muted)',
+                  fontWeight: isTop3 ? 700 : 400,
+                }}>
+                  {RANK_MEDALS[row.rank] ?? row.rank}
+                </div>
+
+                <div style={s.colName}>
+                  <span style={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: isMe ? 'var(--yellow)' : 'var(--text)',
+                  }}>
+                    {row.userName}
+                  </span>
+                  {isMe && <span style={s.youBadge}>YOU</span>}
+                </div>
+
+                <div style={{
+                  ...s.colScore,
+                  fontSize: 14,
+                  color: 'var(--yellow)',
+                  fontWeight: 700,
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}>
+                  {row.points.toLocaleString()}
+                </div>
               </div>
-              <div style={s.colName}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: isMe ? 'var(--yellow)' : 'var(--text)' }}>
-                  {row.name}
-                </span>
-                {isMe && <span style={s.youBadge}>YOU</span>}
-              </div>
-              <div style={{ ...s.colNum, fontSize: 13, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
-                {row.puzzles}
-              </div>
-              <div style={{ ...s.colScore, fontSize: 14, color: 'var(--yellow)', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>
-                {row.score.toLocaleString()}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </main>
   );
 }
 
+// ─── Chip helper ──────────────────────────────────────────────────────────────
+const chip = (active: boolean): React.CSSProperties => ({
+  borderRadius: 20,
+  padding: '6px 16px',
+  fontSize: 12,
+  fontWeight: 500,
+  cursor: 'pointer',
+  fontFamily: 'Inter, sans-serif',
+  transition: 'all 0.15s',
+  background: active ? 'rgba(200,168,75,0.1)' : 'var(--surface2)',
+  border:     active ? '1px solid var(--yellow)' : '1px solid var(--border)',
+  color:      active ? 'var(--yellow)' : 'var(--text-muted)',
+});
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
 const s: Record<string, React.CSSProperties> = {
   page: {
     maxWidth: 700,
@@ -134,19 +159,10 @@ const s: Record<string, React.CSSProperties> = {
     background: 'var(--yellow)',
     borderRadius: 1,
   },
-  tabRow: {
+  filterRow: {
     display: 'flex',
     gap: 8,
-    marginBottom: 24,
-  },
-  chip: {
-    borderRadius: 20,
-    padding: '6px 16px',
-    fontSize: 12,
-    fontWeight: 500,
-    cursor: 'pointer',
-    fontFamily: 'Inter, sans-serif',
-    transition: 'all 0.15s',
+    flexWrap: 'wrap',
   },
   table: {
     background: 'var(--surface)',
@@ -164,16 +180,16 @@ const s: Record<string, React.CSSProperties> = {
     fontSize: 11,
     fontWeight: 600,
     color: 'var(--text-muted)',
-    textTransform: 'uppercase',
+    textTransform: 'uppercase' as const,
     letterSpacing: '0.8px',
   },
   tableRow: {
     display: 'flex',
     alignItems: 'center',
-    padding: '13px 0',
+    padding: '12px 0',
   },
   colRank: {
-    width: 30,
+    width: 36,
     flexShrink: 0,
   },
   colName: {
@@ -182,14 +198,9 @@ const s: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: 8,
   },
-  colNum: {
-    width: 70,
-    textAlign: 'right',
-    paddingRight: 8,
-  },
   colScore: {
-    width: 80,
-    textAlign: 'right',
+    width: 100,
+    textAlign: 'right' as const,
   },
   youBadge: {
     fontSize: 9,
@@ -200,5 +211,9 @@ const s: Record<string, React.CSSProperties> = {
     borderRadius: 4,
     padding: '1px 5px',
     letterSpacing: '0.5px',
+  },
+  empty: {
+    textAlign: 'center',
+    padding: '40px 20px',
   },
 };

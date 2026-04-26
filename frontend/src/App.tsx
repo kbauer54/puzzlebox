@@ -5,35 +5,60 @@ import HomePage from './components/HomePage';
 import ArchivePage from './components/ArchivePage';
 import LeaderboardPage from './components/LeaderboardPage';
 import WordleGame from './components/WordleGame';
+import { updateLeaderboard } from './components/LeaderboardDatabase';
 
-// ─── Types (shared across the app) ───────────────────────────────────────────
 export type User = {
-  uid: number;
+  uid: string;
   name: string;
   coins: number;
   isBanned: boolean;
+  role: 'guest' | 'registered' | 'admin';
 };
 
 type Page = 'home' | 'archive' | 'leaderboard' | 'wordle';
+type Modal = 'signin' | 'register' | null;
 
-// ─── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [page, setPage]   = useState<Page>('home');
-  const [user, setUser]   = useState<User | null>(null);
+  const [page, setPage]             = useState<Page>('home');
+  const [user, setUser]             = useState<User | null>(null);
+  const [modal, setModal]           = useState<Modal>(null);
+
+  // Score earned during the current game session — saved on register
+  const [pendingScore, setPendingScore] = useState<{ score: number; puzzleId: string } | null>(null);
 
   const navigate = (target: string) => {
-    // Only navigate to known pages
+    if (target === 'register') { setModal('register'); return; }
+    if (target === 'signin')   { setModal('signin');   return; }
     const known: Page[] = ['home', 'archive', 'leaderboard', 'wordle'];
     if (known.includes(target as Page)) setPage(target as Page);
   };
 
-  const handleLogin  = (u: User) => setUser(u);
+  const handleLogin = (u: User) => {
+    setUser(u);
+    setModal(null);
+
+    // If they just registered after finishing a game, save that score now
+    if (pendingScore) {
+      updateLeaderboard(u.uid, u.name, pendingScore.puzzleId, pendingScore.score);
+      setPendingScore(null);
+    }
+  };
+
   const handleLogout = () => setUser(null);
 
+  // Called when a registered user finishes a game
   const handleScoreUpdate = (score: number) => {
     if (!user) return;
-    setUser(prev => prev ? { ...prev, coins: prev.coins + Math.floor(score / 10) } : null);
-    // TODO: wire to POST /api/users/score once Spring Boot backend is ready
+    const coinsEarned = Math.floor(score / 10);
+    setUser(prev => prev ? { ...prev, coins: prev.coins + coinsEarned } : null);
+    updateLeaderboard(user.uid, user.name, 'wordle', score);
+    // TODO: POST to /api/users/score when backend is ready
+  };
+
+  // Called when a guest wants to register after finishing a game
+  const handleRegisterWithScore = (score: number, puzzleId: string) => {
+    setPendingScore({ score, puzzleId });
+    setModal('register');
   };
 
   return (
@@ -44,16 +69,19 @@ export default function App() {
         user={user}
         onLogin={handleLogin}
         onLogout={handleLogout}
+        activeModal={modal}
+        setModal={setModal}
       />
 
       {page === 'home'        && <HomePage        onNavigate={navigate} user={user} />}
-      {page === 'archive'     && <ArchivePage     onNavigate={navigate} />}
+      {page === 'archive'     && <ArchivePage     onNavigate={navigate} user={user} />}
       {page === 'leaderboard' && <LeaderboardPage user={user} />}
       {page === 'wordle'      && (
         <WordleGame
           user={user}
           onScoreUpdate={handleScoreUpdate}
           onNavigate={navigate}
+          onRegisterWithScore={handleRegisterWithScore}
         />
       )}
     </>

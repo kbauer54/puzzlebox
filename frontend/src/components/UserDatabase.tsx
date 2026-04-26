@@ -1,70 +1,110 @@
-// User and more?
+// ─── Types (matching class diagram) ──────────────────────────────────────────
+
+export type UserRole = 'guest' | 'registered' | 'admin';
+
 export type User = {
-  uid: number;
+  id: string;
   name: string;
+  email: string;
+  password: string;
+  isRegistered: boolean;
+  coins: number;
   isBanned: boolean;
+  role: UserRole;
 };
 
-export type Puzzle = {
-  pid: number;
-  name: string;
-  isArchived: boolean;
-};
+// ─── Mock Data ────────────────────────────────────────────────────────────────
 
-export type Entry = {
-  eid: number;
-  uid: number;
-  pid: number;
-  score: number;
-}
-
-// Database for users
-const mockUsers: User[] = [
-  { uid: 1, name: "a", isBanned: false },
-  { uid: 2, name: "b", isBanned: false },
-  { uid: 3, name: "c", isBanned: false },
-  { uid: 4, name: "d", isBanned: false },
-];
-
-// Database for puzzles
-const mockPuzzles:  Puzzle[] = [
-  { pid: 1, name: "Wordle", isArchived: false },
-  { pid: 2, name: "Trivia", isArchived: true },
-};
-
-// Database for user scores for different games
-const mockLeaderboard: Entry[] = [
-  { eid: 1, uid: 1, pid: 1, score: 2 },
-];
-
-   
-const getNextId = (): number => {
-  return mockUsers.length > 0
-    ? Math.max(...mockUsers.map((u) => u.uid)) + 1
-    : 1;
-};
-
-export const getLeaderboard = (): Entry[] => {
-  return [...mockLeaderboard].sort((a, b) => b.score - a.score);
-};
-
-export const getTopUsers = (count: number): Entry[] => {
-  return getLeaderboard().slice(0, count);
-};
-
-export const updateUserScore = (userId: number, newScore: number): void => {
-  const user = mockLeaderboard.find((u) => u.uid === userId);
-  if (user) {
-    user.score = newScore;
-  }
-};
-
-export const addUser = (name: string): void => {
-  const newUser: User = {
-    uid: getNextId(),
-    name,
+const users: User[] = [
+  {
+    id: '1',
+    name: 'CryptoKnight',
+    email: 'crypto@example.com',
+    password: 'hashed_password',
+    isRegistered: true,
+    coins: 450,
     isBanned: false,
+    role: 'registered',
+  },
+  {
+    id: '2',
+    name: 'WordWizard_88',
+    email: 'word@example.com',
+    password: 'hashed_password',
+    isRegistered: true,
+    coins: 320,
+    isBanned: false,
+    role: 'registered',
+  },
+  {
+    id: 'admin1',
+    name: 'Admin',
+    email: 'admin@puzzlebox.com',
+    password: 'hashed_admin_password',
+    isRegistered: true,
+    coins: 0,
+    isBanned: false,
+    role: 'admin',
+  },
+];
+
+// ─── Functions (matching class diagram methods) ───────────────────────────────
+
+const getNextId = (): string => {
+  const maxId = users.reduce((max, u) => Math.max(max, parseInt(u.id) || 0), 0);
+  return String(maxId + 1);
+};
+
+export const register = (name: string, email: string, password: string): User | null => {
+  // Check if email already exists
+  if (users.find(u => u.email === email)) return null;
+
+  const newUser: User = {
+    id: getNextId(),
+    name,
+    email,
+    password, // TODO: hash before storing once backend is wired up
+    isRegistered: true,
+    coins: 200,
+    isBanned: false,
+    role: 'registered',
   };
 
-  mockUsers.push(newUser);
+  users.push(newUser);
+  return newUser;
 };
+
+export const login = (email: string, password: string): User | null => {
+  const user = users.find(u => u.email === email && u.password === password);
+  return user ?? null;
+};
+
+export const findUserById = (id: string): User | undefined => {
+  return users.find(u => u.id === id);
+};
+
+export const findUserByEmail = (email: string): User | undefined => {
+  return users.find(u => u.email === email);
+};
+
+export const updateCoins = (id: string, amount: number): void => {
+  const user = users.find(u => u.id === id);
+  if (user) user.coins = Math.max(0, user.coins + amount);
+};
+
+export const banUser = (id: string): void => {
+  const user = users.find(u => u.id === id);
+  if (user) user.isBanned = true;
+};
+
+export const unbanUser = (id: string): void => {
+  const user = users.find(u => u.id === id);
+  if (user) user.isBanned = false;
+};
+
+export const verifyStatus = (id: string): boolean => {
+  const user = users.find(u => u.id === id);
+  return user ? user.isRegistered && !user.isBanned : false;
+};
+
+export const getAllUsers = (): User[] => [...users];

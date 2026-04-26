@@ -1,3 +1,4 @@
+import { getAllPuzzles } from './PuzzleDatabase';
 import type { User } from '../App';
 
 interface HomePageProps {
@@ -5,23 +6,26 @@ interface HomePageProps {
   user: User | null;
 }
 
-const GAMES = [
-  { id: 'wordle',      name: 'Wordle',      type: 'Word',   dot: 'var(--yellow)', rating: 4.8, status: 'live' },
-  { id: 'trivia',      name: 'Trivia',      type: 'Trivia', dot: 'var(--blue)',   rating: 4.5, status: 'soon' },
-  { id: 'connections', name: 'Connections', type: 'Word',   dot: 'var(--green)',  rating: 4.7, status: 'soon' },
-  { id: 'wordle',      name: 'Cipher',      type: 'Logic',  dot: 'var(--purple)', rating: 4.6, status: 'soon' },
-  { id: 'wordle',      name: 'Riddles',     type: 'Logic',  dot: 'var(--red)',    rating: 4.4, status: 'soon' },
-  { id: 'wordle',      name: 'Anagrams',    type: 'Word',   dot: 'var(--yellow)', rating: 4.3, status: 'soon' },
-];
+const DOT_COLORS: Record<string, string> = {
+  Wordle:      'var(--yellow)',
+  Trivia:      'var(--blue)',
+  Connections: 'var(--green)',
+  Cipher:      'var(--purple)',
+  Riddle:      'var(--red)',
+  Anagram:     'var(--yellow)',
+};
 
 export default function HomePage({ onNavigate, user }: HomePageProps) {
+  const puzzles  = getAllPuzzles();
+  const featured = puzzles[0];
+
   return (
     <main style={s.page} className="fade-up">
+
       {/* ── Hero ── */}
       <section style={s.hero}>
         <h1 style={s.heroTitle}>
-          Play. <em style={s.heroEm}>Solve.</em>
-          <br />Repeat.
+          Play. <em style={s.heroEm}>Solve.</em><br />Repeat.
         </h1>
         <p style={s.heroSub}>
           Daily puzzles across logic, wordplay, ciphers, and trivia.
@@ -42,60 +46,75 @@ export default function HomePage({ onNavigate, user }: HomePageProps) {
       <div style={s.divider} />
 
       {/* ── Featured Puzzle ── */}
-      <section style={{ marginBottom: 32 }}>
-        <div style={s.featuredCard}>
-          <div>
-            <p style={s.sectionLabel}>Featured Puzzle</p>
-            <p style={s.featuredName}>Wordle</p>
-            <p style={s.featuredDesc}>Guess the hidden 5-letter word in 6 tries. Letters turn green, yellow, or gray to guide you.</p>
+      {featured && (
+        <section style={{ marginBottom: 32 }}>
+          <div style={s.featuredCard}>
+            <div style={{ flex: 1 }}>
+              <p style={s.sectionLabel}>Featured Puzzle</p>
+              <p style={s.featuredName}>{featured.name}</p>
+              <p style={s.featuredDesc}>{featured.description}</p>
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <span style={s.badge}>{featured.puzzleType}</span>
+                <span style={s.badge}>{featured.difficulty}</span>
+                <span style={s.badge}>★ {featured.rating}</span>
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={s.featuredPoints}>{featured.maxScore.toLocaleString()}</div>
+              <div style={s.featuredPointsLabel}>max pts</div>
+              <button
+                style={{ ...s.btnPrimary, marginTop: 12, whiteSpace: 'nowrap' }}
+                onClick={() => onNavigate(featured.id)}
+              >
+                Play Now →
+              </button>
+            </div>
           </div>
-          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <div style={s.featuredPoints}>600</div>
-            <div style={s.featuredPointsLabel}>max pts</div>
-            <button style={{ ...s.btnPrimary, marginTop: 12, whiteSpace: 'nowrap' }}
-              onClick={() => onNavigate('wordle')}>
-              Play Now →
-            </button>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── Today's Games ── */}
       <section>
         <p style={{ ...s.sectionLabel, marginBottom: 16 }}>Today's Puzzles</p>
         <div style={s.gameGrid}>
-          {GAMES.map((game, i) => (
-            <div
-              key={i}
-              style={{
-                ...s.gameCard,
-                cursor: game.status === 'live' ? 'pointer' : 'default',
-                opacity: game.status === 'live' ? 1 : 0.55,
-              }}
-              onClick={() => game.status === 'live' && onNavigate(game.id)}
-              onMouseEnter={e => {
-                if (game.status === 'live') {
-                  (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--yellow-dim)';
-                  (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
-                }
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)';
-                (e.currentTarget as HTMLDivElement).style.transform = '';
-              }}
-            >
-              <div style={{ ...s.dot, background: game.dot }} />
-              <p style={s.gameName}>{game.name}</p>
-              <p style={s.gameType}>{game.type}</p>
-              <div style={s.gameFooter}>
-                <span style={s.gameRating}>★ {game.rating}</span>
-                {game.status === 'soon' && <span style={s.comingSoon}>Soon</span>}
-                {game.status === 'live' && <span style={s.liveBadge}>Play →</span>}
+          {puzzles.map(puzzle => {
+            const isLive = puzzle.id === 'wordle';
+            return (
+              <div
+                key={puzzle.id}
+                style={{
+                  ...s.gameCard,
+                  cursor:  isLive ? 'pointer' : 'default',
+                  opacity: isLive ? 1 : 0.55,
+                }}
+                onClick={() => isLive && onNavigate(puzzle.id)}
+                onMouseEnter={e => {
+                  if (isLive) {
+                    (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--yellow-dim)';
+                    (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
+                  }
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)';
+                  (e.currentTarget as HTMLDivElement).style.transform = '';
+                }}
+              >
+                <div style={{ ...s.dot, background: DOT_COLORS[puzzle.puzzleType] ?? 'var(--yellow)' }} />
+                <p style={s.gameName}>{puzzle.name}</p>
+                <p style={s.gameType}>{puzzle.puzzleType}</p>
+                <div style={s.gameFooter}>
+                  <span style={s.gameRating}>★ {puzzle.rating}</span>
+                  {isLive
+                    ? <span style={s.liveBadge}>Play →</span>
+                    : <span style={s.comingSoon}>Soon</span>
+                  }
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
+
     </main>
   );
 }
@@ -106,9 +125,7 @@ const s: Record<string, React.CSSProperties> = {
     margin: '0 auto',
     padding: '40px 24px 60px',
   },
-  hero: {
-    marginBottom: 36,
-  },
+  hero: { marginBottom: 36, textAlign: 'center' },
   heroTitle: {
     fontFamily: "'Playfair Display', serif",
     fontSize: 'clamp(36px, 5vw, 54px)',
@@ -117,22 +134,16 @@ const s: Record<string, React.CSSProperties> = {
     color: 'var(--text)',
     marginBottom: 14,
   },
-  heroEm: {
-    fontStyle: 'italic',
-    color: 'var(--yellow)',
-  },
+  heroEm: { fontStyle: 'italic', color: 'var(--yellow)' },
   heroSub: {
     fontSize: 15,
     color: 'var(--text-dim)',
     lineHeight: 1.7,
     marginBottom: 24,
     maxWidth: 460,
+    margin: '0 auto 24px',
   },
-  heroButtons: {
-    display: 'flex',
-    gap: 12,
-    flexWrap: 'wrap',
-  },
+  heroButtons: { display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' },
   btnPrimary: {
     background: 'var(--yellow)',
     color: '#111',
@@ -143,7 +154,6 @@ const s: Record<string, React.CSSProperties> = {
     fontWeight: 700,
     cursor: 'pointer',
     fontFamily: 'Inter, sans-serif',
-    letterSpacing: '0.2px',
   },
   btnGhost: {
     background: 'transparent',
@@ -156,11 +166,7 @@ const s: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     fontFamily: 'Inter, sans-serif',
   },
-  divider: {
-    height: 1,
-    background: 'var(--border)',
-    marginBottom: 32,
-  },
+  divider: { height: 1, background: 'var(--border)', marginBottom: 32 },
   sectionLabel: {
     fontSize: 11,
     fontWeight: 600,
@@ -205,6 +211,15 @@ const s: Record<string, React.CSSProperties> = {
     letterSpacing: '0.8px',
     marginTop: 2,
   },
+  badge: {
+    fontSize: 10,
+    fontWeight: 600,
+    color: 'var(--text-muted)',
+    background: 'var(--surface2)',
+    border: '1px solid var(--border)',
+    borderRadius: 4,
+    padding: '2px 8px',
+  },
   gameGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
@@ -239,10 +254,7 @@ const s: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  gameRating: {
-    fontSize: 11,
-    color: 'var(--text-dim)',
-  },
+  gameRating:  { fontSize: 11, color: 'var(--text-dim)' },
   comingSoon: {
     fontSize: 10,
     fontWeight: 600,
