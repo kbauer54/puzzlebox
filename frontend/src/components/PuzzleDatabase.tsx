@@ -1,0 +1,125 @@
+// ─── Types (matching class diagram) ──────────────────────────────────────────
+
+export type PuzzleType = 'Wordle' | 'Trivia' | 'Connections' | 'Cipher' | 'Riddle' | 'Anagram';
+
+export type Puzzle = {
+  id: string;
+  name: string;
+  puzzleType: PuzzleType;
+  description: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  maxScore: number;
+  avgTime: string;
+  completionRate: number;
+  rating: number;
+  isArchived: boolean;
+};
+
+// ─── Mock Data ────────────────────────────────────────────────────────────────
+
+const puzzles: Puzzle[] = [
+  {
+    id: 'wordle',
+    name: 'Wordle',
+    puzzleType: 'Wordle',
+    description: 'Guess the hidden 5-letter word in 6 tries. Letters turn green, yellow, or gray to guide you.',
+    difficulty: 'Easy',
+    maxScore: 600,
+    avgTime: '3:45',
+    completionRate: 82,
+    rating: 4.8,
+    isArchived: false,
+  },
+  {
+    id: 'trivia',
+    name: 'Trivia Rush',
+    puzzleType: 'Trivia',
+    description: 'Answer a series of trivia questions across multiple categories before time runs out.',
+    difficulty: 'Medium',
+    maxScore: 800,
+    avgTime: '5:30',
+    completionRate: 74,
+    rating: 4.5,
+    isArchived: false,
+  },
+  {
+    id: 'connections',
+    name: 'Connections',
+    puzzleType: 'Connections',
+    description: 'Group 16 words into 4 categories. Watch out — some words could fit multiple groups.',
+    difficulty: 'Medium',
+    maxScore: 700,
+    avgTime: '6:10',
+    completionRate: 68,
+    rating: 4.7,
+    isArchived: false,
+  },
+  {
+    id: 'cipher',
+    name: 'Cipher Lock',
+    puzzleType: 'Cipher',
+    description: 'Decode a message encrypted with a classical cipher. How fast can you crack it?',
+    difficulty: 'Hard',
+    maxScore: 900,
+    avgTime: '8:20',
+    completionRate: 55,
+    rating: 4.6,
+    isArchived: false,
+  },
+  {
+    id: 'riddle',
+    name: 'Riddle Me',
+    puzzleType: 'Riddle',
+    description: 'Solve a series of classic riddles. Simple at first, but they get tricky fast.',
+    difficulty: 'Medium',
+    maxScore: 650,
+    avgTime: '4:50',
+    completionRate: 71,
+    rating: 4.4,
+    isArchived: false,
+  },
+  {
+    id: 'anagram',
+    name: 'Anagram Blast',
+    puzzleType: 'Anagram',
+    description: 'Unscramble as many words as you can before the clock runs out.',
+    difficulty: 'Easy',
+    maxScore: 500,
+    avgTime: '3:15',
+    completionRate: 88,
+    rating: 4.3,
+    isArchived: false,
+  },
+];
+
+// ─── Functions (matching class diagram methods) ───────────────────────────────
+
+export const getAllPuzzles = (): Puzzle[] => {
+  return puzzles.filter(p => !p.isArchived);
+};
+
+export const getArchivedPuzzles = (): Puzzle[] => {
+  return puzzles.filter(p => p.isArchived);
+};
+
+export const getPuzzleById = (id: string): Puzzle | undefined => {
+  return puzzles.find(p => p.id === id);
+};
+
+export const getPuzzlesByType = (type: PuzzleType): Puzzle[] => {
+  return puzzles.filter(p => p.puzzleType === type && !p.isArchived);
+};
+
+export const archivePuzzle = (id: string): void => {
+  const puzzle = puzzles.find(p => p.id === id);
+  if (puzzle) puzzle.isArchived = true;
+};
+
+export const unarchivePuzzle = (id: string): void => {
+  const puzzle = puzzles.find(p => p.id === id);
+  if (puzzle) puzzle.isArchived = false;
+};
+
+export const addPuzzle = (puzzle: Puzzle): void => {
+  puzzles.push(puzzle);
+};
