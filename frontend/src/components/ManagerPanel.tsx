@@ -19,7 +19,9 @@ export default function ManagerPanel({ user }: ManagerPanelProps) {
     <>
       {puzzles.map((p) => (
         <div>
-          <p> Status: {p.isArchived ? "Archived" : "Public"} </p>
+          <p>
+            {p.name}: {p.isArchived ? "Archived" : "Public"}{" "}
+          </p>
           <button key={p.id} onClick={() => toggleArchived(p.id)}>
             Toggle {p.name}
           </button>
