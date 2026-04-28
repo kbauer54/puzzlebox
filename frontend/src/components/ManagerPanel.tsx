@@ -18,9 +18,12 @@ export default function ManagerPanel({ user }: ManagerPanelProps) {
   return (
     <>
       {puzzles.map((p) => (
-        <button key={p.id} onClick={() => toggleArchived(p.id)}>
-          Toggle {p.name}
-        </button>
+        <div>
+          <p> Status: {p.isArchived ? "Archived" : "Public"} </p>
+          <button key={p.id} onClick={() => toggleArchived(p.id)}>
+            Toggle {p.name}
+          </button>
+        </div>
       ))}
     </>
   );
