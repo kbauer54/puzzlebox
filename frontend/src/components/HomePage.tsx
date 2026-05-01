@@ -1,5 +1,5 @@
 import { getAllPuzzles } from './PuzzleDatabase';
-import type { User } from '../App';
+import type { User } from '../types';
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -34,6 +34,9 @@ export default function HomePage({ onNavigate, user }: HomePageProps) {
         <div style={s.heroButtons}>
           <button style={s.btnPrimary} onClick={() => onNavigate('wordle')}>
             ⚡ Quick Play
+          </button>
+          <button style={s.btnPrimary} onClick={() => onNavigate('trivia')}>
+            🧠 Trivia
           </button>
           {!user && (
             <button style={s.btnGhost} onClick={() => onNavigate('register')}>
@@ -78,7 +81,7 @@ export default function HomePage({ onNavigate, user }: HomePageProps) {
         <p style={{ ...s.sectionLabel, marginBottom: 16 }}>Today's Puzzles</p>
         <div style={s.gameGrid}>
           {puzzles.map(puzzle => {
-            const isLive = puzzle.id === 'wordle';
+            const isLive = puzzle.id === 'wordle' || puzzle.id === 'trivia';
             return (
               <div
                 key={puzzle.id}

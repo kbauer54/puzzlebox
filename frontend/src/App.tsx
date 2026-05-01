@@ -7,11 +7,12 @@ import RegisterPage from './components/RegisterPage';
 import ArchivePage from './components/ArchivePage';
 import LeaderboardPage from './components/LeaderboardPage';
 import WordleGame from './components/WordleGame';
+import TriviaGame from './components/TriviaGame';
 import { updateLeaderboard } from './components/LeaderboardDatabase';
 
 import type { User } from './types';
 
-type Page = 'home' | 'archive' | 'leaderboard' | 'wordle';
+type Page = 'home' | 'archive' | 'leaderboard' | 'wordle' | 'trivia';
 type Modal = 'signin' | 'register' | null;
 
 export default function App() {
@@ -25,7 +26,7 @@ export default function App() {
   const navigate = (target: string) => {
     if (target === 'register') { setModal('register'); return; }
     if (target === 'signin')   { setModal('signin');   return; }
-    const known: Page[] = ['home', 'archive', 'leaderboard', 'wordle'];
+    const known: Page[] = ['home', 'archive', 'leaderboard', 'wordle', 'trivia'];
     if (known.includes(target as Page)) setPage(target as Page);
   };
 
@@ -80,6 +81,15 @@ export default function App() {
           onRegisterWithScore={handleRegisterWithScore}
         />
       )}
+      {page === 'trivia'      && (
+        <TriviaGame
+          user={user}
+          onScoreUpdate={handleScoreUpdate}
+          onNavigate={navigate}
+          onRegisterWithScore={handleRegisterWithScore}
+        />
+      )}
+
       {modal === 'signin' && (
         <LoginPage 
           onLogin={handleLogin} 

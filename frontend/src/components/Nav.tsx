@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { User } from '../App';
+import type { User } from '../types';
 
 interface NavProps {
   currentPage: string;
@@ -35,6 +35,8 @@ export default function Nav({ currentPage, onNavigate, user, onLogin, onLogout, 
     { id: 'home',        label: 'Home'        },
     { id: 'archive',     label: 'Archive'     },
     { id: 'leaderboard', label: 'Leaderboard' },
+    { id: 'trivia',      label: 'Trivia'      },
+    
   ];
 
   return (

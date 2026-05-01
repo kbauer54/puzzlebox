@@ -16,7 +16,6 @@ export type Puzzle = {
 };
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
-
 const puzzles: Puzzle[] = [
   {
     id: 'wordle',
@@ -32,14 +31,14 @@ const puzzles: Puzzle[] = [
   },
   {
     id: 'trivia',
-    name: 'Trivia Rush',
+    name: 'Big 4 Sports Trivia',
     puzzleType: 'Trivia',
-    description: 'Answer a series of trivia questions across multiple categories before time runs out.',
-    difficulty: 'Medium',
-    maxScore: 800,
-    avgTime: '5:30',
-    completionRate: 74,
-    rating: 4.5,
+    description: 'Can you name all 124 professional teams in the NFL, NBA, MLB, and NHL in under 10 minutes?',
+    difficulty: 'Hard',
+    maxScore: 500,
+    avgTime: '9:45',
+    completionRate: 24, 
+    rating: 4.9,
     isArchived: false,
   },
   {
@@ -58,7 +57,7 @@ const puzzles: Puzzle[] = [
     id: 'cipher',
     name: 'Cipher Lock',
     puzzleType: 'Cipher',
-    description: 'Decode a message encrypted with a classical cipher. How fast can you crack it?',
+    description: 'Decode a message encrypted with a substitution cipher. How fast can you crack it?',
     difficulty: 'Hard',
     maxScore: 900,
     avgTime: '8:20',
