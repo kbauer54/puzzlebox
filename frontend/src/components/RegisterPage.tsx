@@ -1,23 +1,23 @@
-// src/components/LoginPage.tsx
+// src/components/RegisterPage.tsx
 import type { User } from '../types';
 
 type Props = {
   onLogin: (u: User) => void;
   onClose: () => void;
-  onSwitchToRegister: () => void;
+  onSwitchToLogin: () => void;
 };
 
-export default function LoginPage({ onLogin, onClose, onSwitchToRegister }: Props) {
+export default function RegisterPage({ onLogin, onClose, onSwitchToLogin }: Props) {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Temporary mock login to test the UI flow
-    const mockUser: User = { uid: '123', name: 'PuzzleMaster', coins: 0, isBanned: false, role: 'registered' };
+    // Temporary mock registration
+    const username = (document.getElementById('username') as HTMLInputElement).value;
+    const mockUser: User = { uid: '456', name: username, coins: 0, isBanned: false, role: 'registered' };
     onLogin(mockUser);
   };
 
   return (
-    // The dark transparent overlay
     <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }} tabIndex={-1}>
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content shadow border-0 rounded-3">
@@ -27,27 +27,35 @@ export default function LoginPage({ onLogin, onClose, onSwitchToRegister }: Prop
           </div>
 
           <div className="modal-body p-4 p-md-5 pt-0">
-            <h2 className="text-center mb-4 fw-bold">Welcome Back</h2>
+            <h2 className="text-center mb-4 fw-bold">Create Account</h2>
             
             <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label htmlFor="username" className="form-label">Username</label>
+                <input type="text" className="form-control" id="username" required />
+              </div>
               <div className="mb-3">
                 <label htmlFor="email" className="form-label">Email address</label>
                 <input type="email" className="form-control" id="email" required />
               </div>
-              <div className="mb-4">
+              <div className="mb-3">
                 <label htmlFor="password" className="form-label">Password</label>
                 <input type="password" className="form-control" id="password" required />
               </div>
+              <div className="mb-4">
+                <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                <input type="password" className="form-control" id="confirmPassword" required />
+              </div>
               <div className="d-grid">
-                <button type="submit" className="btn btn-primary btn-lg">Login</button>
+                <button type="submit" className="btn btn-warning btn-lg fw-bold">Sign Up</button>
               </div>
             </form>
             
             <div className="text-center mt-4">
               <p className="mb-0">
-                Don't have an account?{' '}
-                <button className="btn btn-link text-decoration-none fw-bold text-warning p-0 align-baseline" onClick={onSwitchToRegister}>
-                  Register here
+                Already have an account?{' '}
+                <button className="btn btn-link text-decoration-none fw-bold p-0 align-baseline" onClick={onSwitchToLogin}>
+                  Log in here
                 </button>
               </p>
             </div>

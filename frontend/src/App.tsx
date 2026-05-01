@@ -2,18 +2,14 @@ import { useState } from 'react';
 import './App.css';
 import Nav from './components/Nav';
 import HomePage from './components/HomePage';
+import LoginPage from './components/LoginPage';
+import RegisterPage from './components/RegisterPage';
 import ArchivePage from './components/ArchivePage';
 import LeaderboardPage from './components/LeaderboardPage';
 import WordleGame from './components/WordleGame';
 import { updateLeaderboard } from './components/LeaderboardDatabase';
 
-export type User = {
-  uid: string;
-  name: string;
-  coins: number;
-  isBanned: boolean;
-  role: 'guest' | 'registered' | 'admin';
-};
+import type { User } from './types';
 
 type Page = 'home' | 'archive' | 'leaderboard' | 'wordle';
 type Modal = 'signin' | 'register' | null;
@@ -82,6 +78,21 @@ export default function App() {
           onScoreUpdate={handleScoreUpdate}
           onNavigate={navigate}
           onRegisterWithScore={handleRegisterWithScore}
+        />
+      )}
+      {modal === 'signin' && (
+        <LoginPage 
+          onLogin={handleLogin} 
+          onClose={() => setModal(null)} 
+          onSwitchToRegister={() => setModal('register')} 
+        />
+      )}
+      
+      {modal === 'register' && (
+        <RegisterPage 
+          onLogin={handleLogin} 
+          onClose={() => setModal(null)} 
+          onSwitchToLogin={() => setModal('signin')} 
         />
       )}
     </>
