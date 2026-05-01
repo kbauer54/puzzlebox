@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { User } from "../App";
+import type { User } from "../types";
 import { getAllPuzzles as initialPuzzles } from "./PuzzleDatabase";
 
 interface ManagerPanelProps {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getUserRank } from './LeaderboardDatabase';
-import type { User } from '../App';
+import type { User } from '../types';
 
 const WORDS = [
   'crane','slate','trace','audio','raise','arose','stare','snare','share','score',

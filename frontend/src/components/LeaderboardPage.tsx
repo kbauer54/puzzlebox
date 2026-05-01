@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { getTopUsers } from './LeaderboardDatabase';
 import type { TimeFrame } from './LeaderboardDatabase';
-import type { User } from '../App';
+import type { User } from '../types';
 
 interface LeaderboardPageProps {
   user: User | null;
