@@ -8,11 +8,12 @@ import ArchivePage from './components/ArchivePage';
 import LeaderboardPage from './components/LeaderboardPage';
 import WordleGame from './components/WordleGame';
 import TriviaGame from './components/TriviaGame';
+import CountdownTrivia from './components/CountdownTrivia';
 import { updateLeaderboard } from './components/LeaderboardDatabase';
 
 import type { User } from './types';
 
-type Page = 'home' | 'archive' | 'leaderboard' | 'wordle' | 'trivia';
+type Page = 'home' | 'archive' | 'leaderboard' | 'wordle' | 'trivia' | 'countdown';
 type Modal = 'signin' | 'register' | null;
 
 export default function App() {
@@ -26,7 +27,7 @@ export default function App() {
   const navigate = (target: string) => {
     if (target === 'register') { setModal('register'); return; }
     if (target === 'signin')   { setModal('signin');   return; }
-    const known: Page[] = ['home', 'archive', 'leaderboard', 'wordle', 'trivia'];
+    const known: Page[] = ['home', 'archive', 'leaderboard', 'wordle', 'trivia', 'countdown'];
     if (known.includes(target as Page)) setPage(target as Page);
   };
 
@@ -83,6 +84,15 @@ export default function App() {
       )}
       {page === 'trivia'      && (
         <TriviaGame
+          user={user}
+          onScoreUpdate={handleScoreUpdate}
+          onNavigate={navigate}
+          onRegisterWithScore={handleRegisterWithScore}
+        />
+      )}
+
+      {page === 'countdown' && (
+        <CountdownTrivia
           user={user}
           onScoreUpdate={handleScoreUpdate}
           onNavigate={navigate}

@@ -54,6 +54,18 @@ const puzzles: Puzzle[] = [
     isArchived: false,
   },
   {
+    id: 'countdown',
+    name: '1 to 10: General Knowledge',
+    puzzleType: 'Trivia',
+    description: 'Answer 55 questions spread across 10 categories. The catch? Category 1 has 1 answer, Category 10 has 10 answers.',
+    difficulty: 'Medium',
+    maxScore: 800,
+    avgTime: '12:30',
+    completionRate: 41,
+    rating: 4.8,
+    isArchived: false, // If set to false, it will show on the Home page too!
+  },
+  {
     id: 'cipher',
     name: 'Cipher Lock',
     puzzleType: 'Cipher',
