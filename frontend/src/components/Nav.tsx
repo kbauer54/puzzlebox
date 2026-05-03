@@ -53,6 +53,7 @@ export default function Nav({ currentPage, onNavigate, user, onLogin, onLogout, 
           ))}
           
           {user ? (
+            // using "registered" user as test
             user.role === "registered" ? (
               <button
                 key={"managerpanel"}
