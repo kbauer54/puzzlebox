@@ -9,11 +9,12 @@ import LeaderboardPage from './components/LeaderboardPage';
 import WordleGame from './components/WordleGame';
 import TriviaGame from './components/TriviaGame';
 import CountdownTrivia from './components/CountdownTrivia';
+import ManagerPanel from "./components/ManagerPanel";
 import { updateLeaderboard } from './components/LeaderboardDatabase';
 
 import type { User } from './types';
 
-type Page = 'home' | 'archive' | 'leaderboard' | 'wordle' | 'trivia' | 'countdown';
+type Page = 'home' | 'archive' | 'leaderboard' | 'managerpanel' | 'wordle' | 'trivia' | 'countdown';
 type Modal = 'signin' | 'register' | null;
 
 export default function App() {
@@ -27,7 +28,7 @@ export default function App() {
   const navigate = (target: string) => {
     if (target === 'register') { setModal('register'); return; }
     if (target === 'signin')   { setModal('signin');   return; }
-    const known: Page[] = ['home', 'archive', 'leaderboard', 'wordle', 'trivia', 'countdown'];
+    const known: Page[] = ['home', 'archive', 'leaderboard', 'managerpanel', 'wordle', 'trivia', 'countdown'];
     if (known.includes(target as Page)) setPage(target as Page);
   };
 
@@ -74,6 +75,7 @@ export default function App() {
       {page === 'home'        && <HomePage        onNavigate={navigate} user={user} />}
       {page === 'archive'     && <ArchivePage     onNavigate={navigate} user={user} />}
       {page === 'leaderboard' && <LeaderboardPage user={user} />}
+      {page === "managerpanel" && <ManagerPanel user={user} />}
       {page === 'wordle'      && (
         <WordleGame
           user={user}
