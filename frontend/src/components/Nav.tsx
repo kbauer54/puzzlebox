@@ -51,6 +51,22 @@ export default function Nav({ currentPage, onNavigate, user, onLogin, onLogout, 
               {link.label}
             </button>
           ))}
+          
+          {user ? (
+            user.role === "registered" ? (
+              <button
+                key={"managerpanel"}
+                style={{
+                  ...s.navLink,
+                  color: "var(--text-dim)",
+                }}
+                onClick={() => onNavigate("managerpanel")}
+              >
+                {"Manager-Panel"}
+              </button>
+            ) : null
+          ) : null}
+
           {user ? (
             <>
               <span style={s.coinBadge}>⬡ {user.coins}</span>
