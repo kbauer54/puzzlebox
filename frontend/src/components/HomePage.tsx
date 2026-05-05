@@ -38,6 +38,10 @@ export default function HomePage({ onNavigate, user }: HomePageProps) {
           <button style={s.btnPrimary} onClick={() => onNavigate('trivia')}>
             🧠 Trivia
           </button>
+          {/* --- ADDED CONNECTIONS BUTTON --- */}
+          <button style={s.btnPrimary} onClick={() => onNavigate('connections')}>
+            🔗 Connections
+          </button>
           {!user && (
             <button style={s.btnGhost} onClick={() => onNavigate('register')}>
               Register — It's Free

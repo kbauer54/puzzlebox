@@ -14,7 +14,7 @@ import { updateLeaderboard } from './components/LeaderboardDatabase';
 
 import type { User } from './types';
 
-type Page = 'home' | 'archive' | 'leaderboard' | 'managerpanel' | 'wordle' | 'trivia' | 'countdown';
+type Page = 'home' | 'archive' | 'leaderboard' | 'managerpanel' | 'wordle' | 'trivia' | 'countdown' | 'connections';
 type Modal = 'signin' | 'register' | null;
 
 export default function App() {
@@ -28,7 +28,7 @@ export default function App() {
   const navigate = (target: string) => {
     if (target === 'register') { setModal('register'); return; }
     if (target === 'signin')   { setModal('signin');   return; }
-    const known: Page[] = ['home', 'archive', 'leaderboard', 'managerpanel', 'wordle', 'trivia', 'countdown'];
+    const known: Page[] = ['home', 'archive', 'leaderboard', 'managerpanel', 'wordle', 'trivia', 'countdown', 'connections'];
     if (known.includes(target as Page)) setPage(target as Page);
   };
 
