@@ -10,11 +10,12 @@ import WordleGame from './components/WordleGame';
 import TriviaGame from './components/TriviaGame';
 import CountdownTrivia from './components/CountdownTrivia';
 import ManagerPanel from "./components/ManagerPanel";
+import ConnectionsGame from './components/ConnectionsGame';
 import { updateLeaderboard } from './components/LeaderboardDatabase';
 
 import type { User } from './types';
 
-type Page = 'home' | 'archive' | 'leaderboard' | 'managerpanel' | 'wordle' | 'trivia' | 'countdown' | 'connections';
+type Page = 'home' | 'archive' | 'leaderboard' | 'managerpanel' | 'wordle' | 'connections' | 'trivia' | 'countdown';
 type Modal = 'signin' | 'register' | null;
 
 export default function App() {
@@ -28,7 +29,7 @@ export default function App() {
   const navigate = (target: string) => {
     if (target === 'register') { setModal('register'); return; }
     if (target === 'signin')   { setModal('signin');   return; }
-    const known: Page[] = ['home', 'archive', 'leaderboard', 'managerpanel', 'wordle', 'trivia', 'countdown', 'connections'];
+    const known: Page[] = ['home', 'archive', 'leaderboard', 'managerpanel', 'wordle', 'connections', 'trivia', 'countdown'];
     if (known.includes(target as Page)) setPage(target as Page);
   };
 
@@ -78,6 +79,14 @@ export default function App() {
       {page === "managerpanel" && <ManagerPanel user={user} />}
       {page === 'wordle'      && (
         <WordleGame
+          user={user}
+          onScoreUpdate={handleScoreUpdate}
+          onNavigate={navigate}
+          onRegisterWithScore={handleRegisterWithScore}
+        />
+      )}
+      {page === 'connections' && (
+        <ConnectionsGame
           user={user}
           onScoreUpdate={handleScoreUpdate}
           onNavigate={navigate}
