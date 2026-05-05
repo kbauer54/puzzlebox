@@ -19,6 +19,13 @@ export default function HomePage({ onNavigate, user }: HomePageProps) {
   const puzzles  = getAllPuzzles();
   const featured = puzzles[0];
 
+  const LIVE_GAMES = ['wordle', 'trivia', 'countdown', 'connections'];
+
+  const quickPlay = () => {
+    const pick = LIVE_GAMES[Math.floor(Math.random() * LIVE_GAMES.length)];
+    onNavigate(pick);
+  };
+
   return (
     <main style={s.page} className="fade-up">
 
@@ -32,15 +39,8 @@ export default function HomePage({ onNavigate, user }: HomePageProps) {
           <br />Compete on the leaderboard. Sharpen your mind.
         </p>
         <div style={s.heroButtons}>
-          <button style={s.btnPrimary} onClick={() => onNavigate('wordle')}>
+          <button style={s.btnPrimary} onClick={quickPlay}>
             ⚡ Quick Play
-          </button>
-          <button style={s.btnPrimary} onClick={() => onNavigate('trivia')}>
-            🧠 Trivia
-          </button>
-          {/* --- ADDED CONNECTIONS BUTTON --- */}
-          <button style={s.btnPrimary} onClick={() => onNavigate('connections')}>
-            🔗 Connections
           </button>
           {!user && (
             <button style={s.btnGhost} onClick={() => onNavigate('register')}>

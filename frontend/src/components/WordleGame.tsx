@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { getUserRank } from './LeaderboardDatabase';
 import type { User } from '../types';
 
+const [showHint, setShowHint] = useState(false);
+
 const WORDS = [
   'aback','abase','abash','abate','abbey','abbot','abhor','abide','abler','abode',
   'abort','about','above','abuse','abyss','acids','acorn','acres','acted','acute',
@@ -304,10 +306,15 @@ export default function WordleGame({ user, onScoreUpdate, onNavigate, onRegister
       <div style={s.gameArea}>
         <div style={s.header}>
           <h1 style={s.title}>WORDLE</h1>
-          {/* DEBUG — remove before final submission */}
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8, fontFamily: 'monospace' }}>
-            🛠 answer: {answer}
-          </div>
+            <button
+              onClick={() => setShowHint(h => !h)}
+              style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text-muted)', fontSize: 10, cursor: 'pointer', padding: '2px 7px', marginRight: 6 }}
+            >
+              {showHint ? 'hide' : '🛠 hint'}
+            </button>
+            {showHint && <>answer: <strong style={{ color: 'var(--yellow)' }}>{answer}</strong></>}
+          </div>          
           <div style={s.divider} />
         </div>
 
