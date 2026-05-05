@@ -8,7 +8,8 @@ interface ManagerPanelProps {
 }
 
 // clickable button that tracks isArchived boolean for each game
-export default function ManagerPanel({ user }: ManagerPanelProps) {
+export default function ManagerPanel({ user: _user }: ManagerPanelProps) {
+  
   const [puzzles, setPuzzles] = useState(initialPuzzles);
 
   const toggleArchived = (id: string) => {

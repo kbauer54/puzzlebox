@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { getUserRank } from './LeaderboardDatabase';
-import type { User } from '../App';
+import type { User } from '../types';
 
 interface ConnectionsGameProps {
   user: User | null;

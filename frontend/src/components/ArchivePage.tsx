@@ -10,7 +10,7 @@ interface ArchivePageProps {
 
 type FilterValue = 'All' | 'Archived' | PuzzleType | 'Hard';
 
-const FILTERS: FilterValue[] = ['All', 'Word', 'Logic', 'Cipher', 'Trivia', 'Hard', 'Archived'];
+const FILTERS = ['All', 'Word', 'Logic', 'Cipher', 'Trivia', 'Hard', 'Archived'] as const;
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   Easy:   'var(--green)',
@@ -18,9 +18,8 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   Hard:   'var(--red)',
 };
 
-export default function ArchivePage({ onNavigate, user }: ArchivePageProps) {
-  const [activeFilter, setActiveFilter] = useState<FilterValue>('All');
-
+export default function ArchivePage({ onNavigate, user: _user }: ArchivePageProps) {
+  
   const activePuzzles  = getAllPuzzles();
   const archivedPuzzles = getArchivedPuzzles();
 
