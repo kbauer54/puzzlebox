@@ -52,8 +52,8 @@ export default function Nav({ currentPage, onNavigate, user, onLogin, onLogout, 
           ))}
           
           {user ? (
-            // using "registered" user as test
-            user.role === "registered" ? (
+            // manager panel appears if admin is logged in
+            user.role === "admin" ? (
               <button
                 key={"managerpanel"}
                 style={{
