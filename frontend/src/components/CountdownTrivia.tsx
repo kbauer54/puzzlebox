@@ -140,23 +140,30 @@ export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithSco
     const categoryItems = ITEMS.filter(item => item.categoryId === categoryId);
 
     return (
-      <div key={categoryId} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <h5 style={{ textAlign: 'center', color: '#fff', fontSize: '15px', fontWeight: 'bold', margin: '0 0 4px 0' }}>
+      <div key={categoryId} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <h6 style={{ 
+          textAlign: 'center', 
+          color: 'var(--yellow, #f5c518)', 
+          fontSize: '12px', 
+          fontWeight: 'bold', 
+          margin: '0 0 4px 0',
+          textTransform: 'uppercase' 
+        }}>
           {category?.title}
-        </h5>
+        </h6>
         
         {categoryItems.map((item) => {
           const isFound = foundIds.includes(item.id);
           const isMissed = isGameOver && !isFound; 
           
-          let bgColor = '#1a1a1a'; 
-          let borderColor = '#333';
-          let textColor = '#666';
+          let bgColor = '#111'; 
+          let borderColor = '#222';
+          let textColor = '#444';
 
           if (isFound) {
             bgColor = '#0f5132'; borderColor = '#198754'; textColor = '#d1e7dd';
           } else if (isMissed) {
-            bgColor = '#842029'; borderColor = '#dc3545'; textColor = '#f8d7da';
+            bgColor = '#441111'; borderColor = '#dc3545'; textColor = '#f8d7da';
           }
 
           return (
@@ -164,7 +171,7 @@ export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithSco
               key={item.id} 
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 'bold', borderRadius: '4px', height: '26px', fontSize: '13px', 
+                fontWeight: 'bold', borderRadius: '2px', height: '20px', fontSize: '11px', 
                 border: `1px solid ${borderColor}`, backgroundColor: bgColor, color: textColor,
                 transition: 'all 0.2s ease', overflow: 'hidden', whiteSpace: 'nowrap'
               }}
@@ -178,61 +185,60 @@ export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithSco
   };
 
   return (
-    <main style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', alignItems: 'center', marginBottom: '16px' }}>
-          <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted, #888)', textTransform: 'uppercase', letterSpacing: '1px' }}>Score</div>
-            <h2 style={{ margin: 0, fontSize: '32px', fontWeight: 'bold', color: 'var(--text, #fff)' }}>
-              {foundIds.length} / {ITEMS.length}
-            </h2>
+    <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '10px 20px' }}>
+      {/* HEADER SECTION - MADE COMPACT */}
+      <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', alignItems: 'center', marginBottom: '10px' }}>
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Score</div>
+            <h3 style={{ margin: 0, fontWeight: 'bold', color: '#fff' }}>{foundIds.length} / {ITEMS.length}</h3>
           </div>
-          <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted, #888)', textTransform: 'uppercase', letterSpacing: '1px' }}>Timer</div>
-            <h2 style={{ margin: 0, fontSize: '32px', fontWeight: 'bold', color: timeLeft <= 60 ? '#ff4444' : '#fff' }}>
-              {minutes}:{seconds}
-            </h2>
+          
+          {/* PLAY BUTTON / INPUT BOX CENTERED */}
+          <div style={{ minWidth: '300px' }}>
+            {!gameStarted ? (
+              <button 
+                onClick={() => setGameStarted(true)} 
+                style={{ backgroundColor: 'var(--yellow, #f5c518)', color: '#111', border: 'none', borderRadius: '4px', padding: '8px 30px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', width: '100%' }}
+              >
+                START QUIZ
+              </button>
+            ) : isGameOver ? (
+              <div style={{ padding: '8px', backgroundColor: isWon ? '#0f5132' : '#661111', color: '#fff', borderRadius: '4px', fontWeight: 'bold' }}>
+                {isWon ? 'Perfect!' : 'Game Over'}
+              </div>
+            ) : (
+              <input
+                type="text"
+                placeholder="Type an answer..."
+                value={inputValue}
+                onChange={handleInputChange}
+                autoComplete="off"
+                autoFocus
+                style={{ backgroundColor: '#111', color: '#fff', border: '1px solid #444', borderRadius: '4px', padding: '8px', fontSize: '16px', textAlign: 'center', width: '100%' }}
+              />
+            )}
           </div>
-        </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
-          {!gameStarted ? (
-            <button 
-              onClick={() => setGameStarted(true)} 
-              style={{ backgroundColor: 'var(--yellow, #f5c518)', color: '#111', border: 'none', borderRadius: '6px', padding: '12px 60px', fontSize: '20px', fontWeight: 'bold', cursor: 'pointer' }}
-            >
-              PLAY QUIZ
-            </button>
-          ) : isGameOver ? (
-            <div style={{ padding: '12px 24px', backgroundColor: isWon ? '#0f5132' : '#842029', color: '#fff', borderRadius: '6px', fontWeight: 'bold', fontSize: '18px' }}>
-              {isWon ? '🎉 Perfect Score!' : '⏰ Time is up! Review the answers below.'}
-            </div>
-          ) : (
-            <input
-              type="text"
-              placeholder="Type an answer..."
-              value={inputValue}
-              onChange={handleInputChange}
-              autoComplete="off"
-              autoFocus
-              style={{ backgroundColor: '#111', color: '#fff', border: '2px solid var(--border, #444)', borderRadius: '6px', padding: '12px 20px', fontSize: '18px', textAlign: 'center', width: '100%', maxWidth: '400px', outline: 'none' }}
-            />
-          )}
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Time</div>
+            <h3 style={{ margin: 0, fontWeight: 'bold', color: timeLeft <= 60 ? '#ff4444' : '#fff' }}>{minutes}:{seconds}</h3>
+          </div>
         </div>
       </div>
 
-      {/* 2-COLUMN LAYOUT MATCHING THE IMAGE */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', width: '100%' }}>
-        {/* Left Column (Odds) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* 2-COLUMN LAYOUT WITH REDUCED GAPS */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
+        {/* Left Column (Odds: 1, 3, 5, 7, 9) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {[1, 3, 5, 7, 9].map(renderCategory)}
         </div>
         
-        {/* Right Column (Evens) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* Right Column (Evens: 2, 4, 6, 8, 10) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {[2, 4, 6, 8, 10].map(renderCategory)}
         </div>
       </div>
     </main>
-  );
+  ); 
 }

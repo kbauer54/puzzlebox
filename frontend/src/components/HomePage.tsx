@@ -81,7 +81,7 @@ export default function HomePage({ onNavigate, user }: HomePageProps) {
         <p style={{ ...s.sectionLabel, marginBottom: 16 }}>Today's Puzzles</p>
         <div style={s.gameGrid}>
           {puzzles.map(puzzle => {
-            const isLive = ['wordle', 'trivia', 'countdown'].includes(puzzle.id);
+            const isLive = ['wordle', 'trivia','countdown', 'connections'].includes(puzzle.id);
             return (
               <div
                 key={puzzle.id}
