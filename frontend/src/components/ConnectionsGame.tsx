@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { getUserRank } from './LeaderboardDatabase';
-import type { User } from '../types';
+import type { User } from '../App';
 
 interface ConnectionsGameProps {
   user: User | null;
@@ -18,6 +18,8 @@ type Group = {
 
 type GameStatus = 'playing' | 'won' | 'lost';
 
+// These are the hidden groups for the game, I only made one iteration of the game.
+// Each group has a title, the 4 correct words, and the color shown after it is solved (always the same right now).
 const GROUPS: Group[] = [
   {
     title: 'Programming Languages',
@@ -41,12 +43,16 @@ const GROUPS: Group[] = [
   },
 ];
 
+// The player gets 4 wrong guesses --> losing
 const MAX_MISTAKES = 4;
 
+// Makes a shuffled copy of the word list so the board is different each game.
 const shuffle = (items: string[]): string[] => {
   return [...items].sort(() => Math.random() - 0.5);
 };
 
+// Checks if the selected 4 words are the same as one of the real groups.
+// Sorting makes it not matter what order the user clicked them in.
 const sameGroup = (selected: string[], groupWords: string[]): boolean => {
   const a = [...selected].sort().join('|');
   const b = [...groupWords].sort().join('|');
@@ -59,73 +65,105 @@ export default function ConnectionsGame({
   onNavigate,
   onRegisterWithScore,
 }: ConnectionsGameProps) {
+  // All words on the board, shuffled at the start.
   const [words, setWords] = useState<string[]>(() =>
     shuffle(GROUPS.flatMap(group => group.words))
   );
+
+  // The words the player currently has clicked.
   const [selected, setSelected] = useState<string[]>([]);
+
+  // Groups the player has already solved.
   const [solvedGroups, setSolvedGroups] = useState<Group[]>([]);
+
+  // How many mistakes the player has left.
   const [mistakesLeft, setMistakesLeft] = useState(MAX_MISTAKES);
+
+  // Tracks if the game is still going, won, or lost.
   const [status, setStatus] = useState<GameStatus>('playing');
+
+  // Small message that pops up when something happens.
   const [toast, setToast] = useState('');
+
+  // Final score shown at the end of the game.
   const [finalScore, setFinalScore] = useState(0);
+
+  // Used to show the logged-in user's leaderboard rank after winning.
   const [userRank, setUserRank] = useState<number | null>(null);
 
+  // If there is no user, they can still play, but their score is not saved yet.
   const isGuest = !user;
 
+  // Only show words that are not already part of a solved group.
   const remainingWords = words.filter(
     word => !solvedGroups.some(group => group.words.includes(word))
   );
 
+  // Shows a temporary message, then clears it after a little bit.
   const showToast = (message: string, ms = 1800) => {
     setToast(message);
     setTimeout(() => setToast(''), ms);
   };
 
   const toggleWord = (word: string) => {
+    // Do not let the user keep clicking after the game ends.
     if (status !== 'playing') return;
 
+    // If the word is already selected, clicking it again removes it.
     if (selected.includes(word)) {
       setSelected(selected.filter(w => w !== word));
       return;
     }
 
+    // Connections only lets you pick 4 words at a time.
     if (selected.length >= 4) {
       showToast('Only select 4 words');
       return;
     }
 
+    // Add the clicked word to the selected list.
     setSelected([...selected, word]);
   };
 
   const submitGroup = () => {
+    // Stops submit from doing anything if the game is already over.
     if (status !== 'playing') return;
 
+    // The user needs exactly 4 words before checking the answer.
     if (selected.length !== 4) {
       showToast('Select exactly 4 words');
       return;
     }
 
+    // Look for a group that matches the 4 selected words.
+    // Also makes sure they are not solving the same group again.
     const match = GROUPS.find(group =>
       sameGroup(selected, group.words) &&
       !solvedGroups.some(solved => solved.title === group.title)
     );
 
     if (match) {
+      // Add the correct group to the solved list and clear the selected words.
       const updatedSolvedGroups = [...solvedGroups, match];
       setSolvedGroups(updatedSolvedGroups);
       setSelected([]);
       showToast(match.title);
 
+      // If all 4 groups are solved, the player wins.
       if (updatedSolvedGroups.length === GROUPS.length) {
         const mistakesMade = MAX_MISTAKES - mistakesLeft;
+
+        // Score goes down for each mistake, but does not go below 100.
         const score = Math.max(100, 700 - mistakesMade * 125);
 
         setFinalScore(score);
         setStatus('won');
 
+        // Logged-in users get their score saved to the leaderboard.
         if (!isGuest) {
           onScoreUpdate?.(score, 'connections');
 
+          // Small delay so the leaderboard has time to update before getting the rank.
           setTimeout(() => {
             if (user) {
               setUserRank(getUserRank(user.uid, 'connections'));
@@ -137,10 +175,12 @@ export default function ConnectionsGame({
       return;
     }
 
+    // If the selected words are wrong, take away one mistake.
     const newMistakesLeft = mistakesLeft - 1;
     setMistakesLeft(newMistakesLeft);
     setSelected([]);
 
+    // If there are no mistakes left, the player loses.
     if (newMistakesLeft <= 0) {
       setStatus('lost');
       setFinalScore(0);
@@ -151,6 +191,7 @@ export default function ConnectionsGame({
   };
 
   const shuffleRemaining = () => {
+    // Keeps solved groups where they are and only shuffles the unsolved words.
     setWords([
       ...solvedGroups.flatMap(group => group.words),
       ...shuffle(remainingWords),
@@ -158,6 +199,7 @@ export default function ConnectionsGame({
   };
 
   const resetGame = () => {
+    // Resets everything back to a fresh game.
     setWords(shuffle(GROUPS.flatMap(group => group.words)));
     setSelected([]);
     setSolvedGroups([]);
@@ -316,6 +358,8 @@ export default function ConnectionsGame({
   );
 }
 
+// All the styling for this page is kept down  here so the game logic stays easier to read
+// and so it can be changed easier
 const s: Record<string, CSSProperties> = {
   page: {
     maxWidth: 680,
