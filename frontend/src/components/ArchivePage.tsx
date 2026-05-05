@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import { getAllPuzzles, getArchivedPuzzles } from './PuzzleDatabase';
 import type { PuzzleType } from './PuzzleDatabase';
-import type { User } from '../types';
 
 interface ArchivePageProps {
   onNavigate: (page: string) => void;
-  user: User | null;
+  user: unknown;
 }
 
 type FilterValue = 'All' | 'Archived' | PuzzleType | 'Hard';
 
-const FILTERS = ['All', 'Word', 'Logic', 'Cipher', 'Trivia', 'Hard', 'Archived'] as const;
+const FILTERS: FilterValue[] = ['All', 'Word', 'Logic', 'Cipher', 'Trivia', 'Hard', 'Archived'];
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   Easy:   'var(--green)',
@@ -18,14 +17,13 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   Hard:   'var(--red)',
 };
 
-export default function ArchivePage({ onNavigate, user: _user }: ArchivePageProps) {
-  
-  const activePuzzles  = getAllPuzzles();
+export default function ArchivePage({ onNavigate }: ArchivePageProps) {
+  const [activeFilter, setActiveFilter] = useState<FilterValue>('All');
+
+  const activePuzzles   = getAllPuzzles();
   const archivedPuzzles = getArchivedPuzzles();
 
-  const allPuzzles = activeFilter === 'Archived'
-    ? archivedPuzzles
-    : activePuzzles;
+  const allPuzzles = activeFilter === 'Archived' ? archivedPuzzles : activePuzzles;
 
   const filtered = activeFilter === 'All' || activeFilter === 'Archived'
     ? allPuzzles
@@ -42,7 +40,6 @@ export default function ArchivePage({ onNavigate, user: _user }: ArchivePageProp
         </p>
       </div>
 
-      {/* Filter chips */}
       <div style={s.filterRow}>
         {FILTERS.map(f => (
           <button
@@ -60,10 +57,9 @@ export default function ArchivePage({ onNavigate, user: _user }: ArchivePageProp
         ))}
       </div>
 
-      {/* Grid */}
       <div style={s.grid}>
         {filtered.map(puzzle => {
-          const isLive = puzzle.id === 'wordle';
+          const isLive = ['wordle', 'trivia', 'countdown', 'connections'].includes(puzzle.id);
           return (
             <div
               key={puzzle.id}
@@ -84,7 +80,6 @@ export default function ArchivePage({ onNavigate, user: _user }: ArchivePageProp
                 (e.currentTarget as HTMLDivElement).style.transform = '';
               }}
             >
-              {/* Card header */}
               <div style={s.cardHeader}>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <span style={s.typeBadge}>{puzzle.puzzleType}</span>
@@ -102,11 +97,9 @@ export default function ArchivePage({ onNavigate, user: _user }: ArchivePageProp
                 }
               </div>
 
-              {/* Card body */}
               <p style={s.cardTitle}>{puzzle.name}</p>
               <p style={s.cardDesc}>{puzzle.description}</p>
 
-              {/* Card footer */}
               <div style={s.cardFooter}>
                 <div style={{ display: 'flex', gap: 10 }}>
                   <span style={s.stat}>★ {puzzle.rating}</span>
@@ -134,109 +127,20 @@ export default function ArchivePage({ onNavigate, user: _user }: ArchivePageProp
 }
 
 const s: Record<string, React.CSSProperties> = {
-  page: {
-    maxWidth: 900,
-    margin: '0 auto',
-    padding: '40px 24px 60px',
-  },
-  pageTitle: {
-    fontSize: 26,
-    fontWeight: 700,
-    color: 'var(--text)',
-    marginBottom: 4,
-  },
-  pageSubtitle: {
-    fontSize: 13,
-    color: 'var(--text-dim)',
-  },
-  filterRow: {
-    display: 'flex',
-    gap: 8,
-    flexWrap: 'wrap',
-    marginBottom: 24,
-  },
-  chip: {
-    borderRadius: 20,
-    padding: '6px 14px',
-    fontSize: 12,
-    fontWeight: 500,
-    cursor: 'pointer',
-    fontFamily: 'Inter, sans-serif',
-    whiteSpace: 'nowrap',
-    transition: 'all 0.15s',
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-    gap: 14,
-  },
-  card: {
-    background: 'var(--surface)',
-    border: '1px solid var(--border)',
-    borderRadius: 10,
-    padding: '16px 18px',
-    transition: 'border-color 0.15s, transform 0.15s',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 8,
-  },
-  cardHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  typeBadge: {
-    fontSize: 10,
-    fontWeight: 600,
-    color: 'var(--text-muted)',
-    border: '1px solid var(--border)',
-    borderRadius: 4,
-    padding: '2px 7px',
-    background: 'var(--surface2)',
-  },
-  popularBadge: {
-    fontSize: 10,
-    fontWeight: 700,
-    color: '#111',
-    background: 'var(--yellow)',
-    borderRadius: 4,
-    padding: '2px 7px',
-  },
-  archivedBadge: {
-    fontSize: 10,
-    fontWeight: 600,
-    color: 'var(--text-muted)',
-    background: 'var(--surface2)',
-    border: '1px solid var(--border)',
-    borderRadius: 4,
-    padding: '2px 7px',
-  },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: 700,
-    color: 'var(--text)',
-  },
-  cardDesc: {
-    fontSize: 12,
-    color: 'var(--text-dim)',
-    lineHeight: 1.55,
-    flex: 1,
-  },
-  cardFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 4,
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  stat: {
-    fontSize: 11,
-    color: 'var(--text-dim)',
-  },
-  playLink: {
-    fontSize: 12,
-    fontWeight: 700,
-    color: 'var(--yellow)',
-  },
+  page:        { maxWidth: 900, margin: '0 auto', padding: '40px 24px 60px' },
+  pageTitle:   { fontSize: 26, fontWeight: 700, color: 'var(--text)', marginBottom: 4 },
+  pageSubtitle:{ fontSize: 13, color: 'var(--text-dim)' },
+  filterRow:   { display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 },
+  chip:        { borderRadius: 20, padding: '6px 14px', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'Inter, sans-serif', whiteSpace: 'nowrap', transition: 'all 0.15s' },
+  grid:        { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 },
+  card:        { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px', transition: 'border-color 0.15s, transform 0.15s', display: 'flex', flexDirection: 'column', gap: 8 },
+  cardHeader:  { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  typeBadge:   { fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 7px', background: 'var(--surface2)' },
+  popularBadge:{ fontSize: 10, fontWeight: 700, color: '#111', background: 'var(--yellow)', borderRadius: 4, padding: '2px 7px' },
+  archivedBadge:{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 7px' },
+  cardTitle:   { fontSize: 15, fontWeight: 700, color: 'var(--text)' },
+  cardDesc:    { fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.55, flex: 1 },
+  cardFooter:  { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, flexWrap: 'wrap', gap: 6 },
+  stat:        { fontSize: 11, color: 'var(--text-dim)' },
+  playLink:    { fontSize: 12, fontWeight: 700, color: 'var(--yellow)' },
 };
