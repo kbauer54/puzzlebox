@@ -7,9 +7,8 @@ interface ArchivePageProps {
   user: unknown;
 }
 
-type FilterValue = 'All' | 'Archived' | PuzzleType | 'Hard';
-
-const FILTERS: FilterValue[] = ['All', 'Word', 'Logic', 'Cipher', 'Trivia', 'Hard', 'Archived'];
+const FILTERS = ['All', 'Wordle', 'Trivia', 'Connections', 'Cipher', 'Riddle', 'Anagram', 'Hard', 'Archived'] as const;
+type FilterValue = typeof FILTERS[number];
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   Easy:   'var(--green)',
