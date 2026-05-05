@@ -92,12 +92,12 @@ type Props = {
   onRegisterWithScore: (score: number, puzzleId: string) => void;
 };
 
-export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithScore }: Props) {
+export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithScore, onNavigate }: Props) {
   const [foundIds, setFoundIds] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState('');
   
   const [gameStarted, setGameStarted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(1200); // 20 minutes = 1200 seconds
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
 
   const isWon = foundIds.length === ITEMS.length;
   const isLost = timeLeft === 0 && !isWon;
@@ -224,6 +224,20 @@ export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithSco
             <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>Time</div>
             <h3 style={{ margin: 0, fontWeight: 'bold', color: timeLeft <= 60 ? '#ff4444' : '#fff' }}>{minutes}:{seconds}</h3>
           </div>
+
+          {/* DEV — for testing */}
+            {gameStarted && !isGameOver && (
+              <button
+                onClick={() => setTimeLeft(0)}
+                style={{
+                  background: '#661111', color: '#fff', border: '1px solid #dc3545',
+                  borderRadius: 4, padding: '4px 10px', fontSize: 11,
+                  fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                🛠 End
+              </button>
+            )}
         </div>
       </div>
 
@@ -239,6 +253,90 @@ export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithSco
           {[2, 4, 6, 8, 10].map(renderCategory)}
         </div>
       </div>
+
+      {isGameOver && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(14,14,14,0.88)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backdropFilter: 'blur(6px)', zIndex: 50,
+        }}>
+          <div style={{
+            textAlign: 'center', padding: '32px 28px', background: 'var(--surface)',
+            border: '1px solid var(--border)', borderRadius: 12,
+            width: '100%', maxWidth: 340, margin: '0 16px',
+          }}>
+            <div style={{ fontSize: 44, marginBottom: 10 }}>{isWon ? '🏆' : '😔'}</div>
+
+            <div style={{
+              fontFamily: "'Playfair Display', serif", fontSize: 32,
+              color: 'var(--yellow)', fontWeight: 700, marginBottom: 6,
+            }}>
+              {isWon ? '800 pts' : '0 pts'}
+            </div>
+
+            <div style={{ fontSize: 14, color: 'var(--text-dim)', marginBottom: 6 }}>
+              {isWon
+                ? `All ${ITEMS.length} answers found!`
+                : `You found ${foundIds.length} of ${ITEMS.length} answers`}
+            </div>
+
+            {isWon && (
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
+                Time remaining: {minutes}:{seconds}
+              </div>
+            )}
+
+            {!user && (
+              <div style={{
+                background: 'rgba(200,168,75,0.08)', border: '1px solid var(--yellow-dim)',
+                borderRadius: 8, padding: '12px 16px', marginBottom: 16,
+              }}>
+                <p style={{ fontSize: 13, color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: 10 }}>
+                  {isWon
+                    ? <>Register to save your <strong style={{ color: 'var(--yellow)' }}>800 pts</strong> and appear on the leaderboard!</>
+                    : 'Register free to track your progress and compete on the leaderboard.'}
+                </p>
+                <button
+                  onClick={() => onRegisterWithScore(isWon ? 800 : 0, 'countdown')}
+                  style={{
+                    background: 'var(--yellow)', color: '#111', border: 'none',
+                    borderRadius: 6, padding: '8px 18px', fontSize: 12,
+                    fontWeight: 700, cursor: 'pointer', width: '100%',
+                  }}
+                >
+                  Register &amp; Save Score →
+                </button>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button
+                onClick={() => onNavigate('leaderboard')}
+                style={{
+                  background: 'transparent', color: 'var(--text-dim)',
+                  border: '1px solid var(--border)', borderRadius: 6,
+                  padding: '10px 18px', fontSize: 13, cursor: 'pointer',
+                }}
+              >
+                Leaderboard
+              </button>
+              <button
+                onClick={() => {
+                  setFoundIds([]); setInputValue('');
+                  setGameStarted(false); setTimeLeft(1200);
+                }}
+                style={{
+                  background: '#538d4e', color: '#fff', border: 'none',
+                  borderRadius: 6, padding: '11px 22px', fontSize: 13,
+                  fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                Play Again →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   ); 
 }

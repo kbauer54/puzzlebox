@@ -143,7 +143,7 @@ const chip = (active: boolean): React.CSSProperties => ({
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const s: Record<string, React.CSSProperties> = {
   page: {
-    maxWidth: 700,
+    maxWidth: 960,
     margin: '0 auto',
     padding: '40px 24px 60px',
   },
@@ -199,7 +199,7 @@ const s: Record<string, React.CSSProperties> = {
     gap: 8,
   },
   colScore: {
-    width: 100,
+    width: 140,
     textAlign: 'right' as const,
   },
   youBadge: {
