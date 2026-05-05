@@ -2,11 +2,11 @@
 import { useState, useEffect } from 'react';
 import type { User } from '../types';
 
-// 1. The Data Structure
+// must have these four fields
 type Team = { id: string; league: string; city: string; name: string };
 // Answer Key
 const TEAMS: Team[] = [
-  // --- NFL (32 Teams) ---
+  // NFL (32 Teams) 
   { id: 'nfl-ari', league: 'NFL', city: 'Arizona', name: 'CARDINALS' },
   { id: 'nfl-atl', league: 'NFL', city: 'Atlanta', name: 'FALCONS' },
   { id: 'nfl-car', league: 'NFL', city: 'Carolina', name: 'PANTHERS' },
@@ -40,7 +40,7 @@ const TEAMS: Team[] = [
   { id: 'nfl-pit', league: 'NFL', city: 'Pittsburgh', name: 'STEELERS' },
   { id: 'nfl-ten', league: 'NFL', city: 'Tennessee', name: 'TITANS' },
 
-  // --- NBA (30 Teams) ---
+  // NBA (30 Teams)
   { id: 'nba-atl', league: 'NBA', city: 'Atlanta', name: 'HAWKS' },
   { id: 'nba-bos', league: 'NBA', city: 'Boston', name: 'CELTICS' },
   { id: 'nba-brk', league: 'NBA', city: 'Brooklyn', name: 'NETS' },
@@ -72,7 +72,7 @@ const TEAMS: Team[] = [
   { id: 'nba-uta', league: 'NBA', city: 'Utah', name: 'JAZZ' },
   { id: 'nba-wsh', league: 'NBA', city: 'Washington', name: 'WIZARDS' },
 
-  // --- MLB (30 Teams) ---
+  // MLB (30 Teams)
   { id: 'mlb-ari', league: 'MLB', city: 'Arizona', name: 'DIAMONDBACKS' },
   { id: 'mlb-atl', league: 'MLB', city: 'Atlanta', name: 'BRAVES' },
   { id: 'mlb-bal', league: 'MLB', city: 'Baltimore', name: 'ORIOLES' },
@@ -104,7 +104,7 @@ const TEAMS: Team[] = [
   { id: 'mlb-tor', league: 'MLB', city: 'Toronto', name: 'BLUE JAYS' },
   { id: 'mlb-wsh', league: 'MLB', city: 'Washington', name: 'NATIONALS' },
 
-  // --- NHL (32 Teams) ---
+  // NHL (32 Teams) 
   { id: 'nhl-ana', league: 'NHL', city: 'Anaheim', name: 'DUCKS' },
   { id: 'nhl-bos', league: 'NHL', city: 'Boston', name: 'BRUINS' },
   { id: 'nhl-buf', league: 'NHL', city: 'Buffalo', name: 'SABRES' },
@@ -138,43 +138,43 @@ const TEAMS: Team[] = [
   { id: 'nhl-wsh', league: 'NHL', city: 'Washington', name: 'CAPITALS' },
   { id: 'nhl-win', league: 'NHL', city: 'Winnipeg', name: 'JETS' }
 ];
-
+// function parameters
 type Props = {
-  user: User | null;
-  onScoreUpdate: (score: number) => void;
+  user: User | null; // user not logged in is null
+  onScoreUpdate: (score: number) => void; // called if user logged in
   onNavigate: (target: string) => void;
   onRegisterWithScore: (score: number, puzzleId: string) => void;
 };
 
 export default function TriviaGame({ user, onScoreUpdate, onRegisterWithScore }: Props) {
-  // --- STATE ---
-  const [foundTeamIds, setFoundTeamIds] = useState<string[]>([]);
+  
+  const [foundTeamIds, setFoundTeamIds] = useState<string[]>([]); //same thing as other trivia tracks users who get it right
   const [inputValue, setInputValue] = useState('');
   
-  const [gameStarted, setGameStarted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
+  const [gameStarted, setGameStarted] = useState(false); // start quia
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minute timer
 
   const isWon = foundTeamIds.length === TEAMS.length;
   const isLost = timeLeft === 0 && !isWon;
-  const isGameOver = isWon || isLost;
+  const isGameOver = isWon || isLost; //timer runs out if user won or lost
 
-  // --- TIMER LOGIC ---
+  // timer functions
   useEffect(() => {
     if (!gameStarted || isGameOver) return;
     const timerId = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
-    return () => clearInterval(timerId);
+    return () => clearInterval(timerId); // stops timer
   }, [gameStarted, isGameOver]);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = String(timeLeft % 60).padStart(2, '0');
 
-  // --- GAME LOGIC ---
+  // GAME LOGIC
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawInput = e.target.value;
     const guess = rawInput.trim().toUpperCase();
     setInputValue(rawInput);
 
-    const matchingTeams = TEAMS.filter((team) => team.name === guess);
+    const matchingTeams = TEAMS.filter((team) => team.name === guess); //spelling must match answer key exactly, future iterations could allow for typos and partial matches
     const newMatches = matchingTeams.filter((team) => !foundTeamIds.includes(team.id));
 
     if (newMatches.length > 0) {
@@ -191,7 +191,7 @@ export default function TriviaGame({ user, onScoreUpdate, onRegisterWithScore }:
     }
   };
 
- // --- COLUMN RENDERER (USING NATIVE CSS FLEXBOX) ---
+ // CSS Grid flex box Game Styles
   const renderLeagueColumn = (leagueName: string) => {
     const leagueTeams = TEAMS.filter((t) => t.league === leagueName);
     

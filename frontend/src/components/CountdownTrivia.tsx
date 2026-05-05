@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { User } from '../types';
 
-// --- DATA STRUCTURE ---
+// Trivia Categories 
 const CATEGORIES = [
   { id: 1, title: "1 2x Heisman Trophy Winner" },
   { id: 2, title: "2 Female Major-Party VP Nominees (Pre-2020)" },
@@ -14,9 +14,9 @@ const CATEGORIES = [
   { id: 9, title: "9 US States With Pop. Larger Than Michigan" },
   { id: 10, title: "10 Franchises Without An NBA Title" }
 ];
-
+// Must have these four fields
 type TriviaItem = { id: string; categoryId: number; display: string; accepts: string[] };
-
+// Trivia Answers or Master Key (1 -1 is Category 1, Answer 1)  display is what user sees  
 const ITEMS: TriviaItem[] = [
   // 1
   { id: '1-1', categoryId: 1, display: 'Archie Griffin', accepts: ['ARCHIE GRIFFIN', 'GRIFFIN'] },
@@ -84,32 +84,32 @@ const ITEMS: TriviaItem[] = [
   { id: '10-9', categoryId: 10, display: 'Clippers', accepts: ['CLIPPERS', 'LA CLIPPERS', 'LOS ANGELES CLIPPERS'] },
   { id: '10-10', categoryId: 10, display: 'Timberwolves', accepts: ['TIMBERWOLVES', 'MINNESOTA TIMBERWOLVES'] },
 ];
-
+// function parameters
 type Props = {
-  user: User | null;
-  onScoreUpdate: (score: number) => void;
+  user: User | null; //null means not logged in, otherwise contains user info
+  onScoreUpdate: (score: number) => void; //called if user logged in
   onNavigate: (target: string) => void;
   onRegisterWithScore: (score: number, puzzleId: string) => void;
 };
 
 export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithScore, onNavigate }: Props) {
-  const [foundIds, setFoundIds] = useState<string[]>([]);
-  const [inputValue, setInputValue] = useState('');
+  const [foundIds, setFoundIds] = useState<string[]>([]); //foundIds tracks which users get it right stored as an array starts at 0
+  const [inputValue, setInputValue] = useState(''); //what user is currently typing in 
   
-  const [gameStarted, setGameStarted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
+  const [gameStarted, setGameStarted] = useState(false); //start quiz button pressed or not
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes timer 
 
-  const isWon = foundIds.length === ITEMS.length;
-  const isLost = timeLeft === 0 && !isWon;
-  const isGameOver = isWon || isLost;
+  const isWon = foundIds.length === ITEMS.length; 
+  const isLost = timeLeft === 0 && !isWon; //user won! or time ran out without finding all answers
+  const isGameOver = isWon || isLost; //either condition ends game
 
   useEffect(() => {
     if (!gameStarted || isGameOver) return;
     const timerId = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
-    return () => clearInterval(timerId);
-  }, [gameStarted, isGameOver]);
+    return () => clearInterval(timerId); // cleanup stops timer when component unmounts or game ends
+  }, [gameStarted, isGameOver]); // important for memory leaks
 
-  const minutes = Math.floor(timeLeft / 60);
+  const minutes = Math.floor(timeLeft / 60); //timer visuals
   const seconds = String(timeLeft % 60).padStart(2, '0');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,7 +117,7 @@ export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithSco
     const guess = rawInput.trim().toUpperCase();
     setInputValue(rawInput);
 
-    // Look for any item that hasn't been found yet, where the guess matches one of its accepted aliases
+    // The guess must match master key exactly, future iterations would allow typos and partial matches
     const match = ITEMS.find(item => 
       !foundIds.includes(item.id) && 
       item.accepts.some(alias => alias === guess)
@@ -134,12 +134,12 @@ export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithSco
       }
     }
   };
-
-  const renderCategory = (categoryId: number) => {
+   // shows the found answers and hides the others, answers in red when game is over
+  const renderCategory = (categoryId: number) => { 
     const category = CATEGORIES.find(c => c.id === categoryId);
     const categoryItems = ITEMS.filter(item => item.categoryId === categoryId);
 
-    return (
+    return ( // columns
       <div key={categoryId} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         <h6 style={{ 
           textAlign: 'center', 
@@ -152,7 +152,7 @@ export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithSco
           {category?.title}
         </h6>
         
-        {categoryItems.map((item) => {
+        {categoryItems.map((item) => { // looks through categorys and checks
           const isFound = foundIds.includes(item.id);
           const isMissed = isGameOver && !isFound; 
           
@@ -161,15 +161,15 @@ export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithSco
           let textColor = '#444';
 
           if (isFound) {
-            bgColor = '#0f5132'; borderColor = '#198754'; textColor = '#d1e7dd';
+            bgColor = '#0f5132'; borderColor = '#198754'; textColor = '#d1e7dd'; //correct its green
           } else if (isMissed) {
-            bgColor = '#441111'; borderColor = '#dc3545'; textColor = '#f8d7da';
+            bgColor = '#441111'; borderColor = '#dc3545'; textColor = '#f8d7da'; //wrong its red
           }
 
           return (
             <div 
               key={item.id} 
-              style={{
+              style={{ // answer box sizes and styles
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontWeight: 'bold', borderRadius: '2px', height: '20px', fontSize: '11px', 
                 border: `1px solid ${borderColor}`, backgroundColor: bgColor, color: textColor,
@@ -195,7 +195,7 @@ export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithSco
           </div>
           
           {/* PLAY BUTTON / INPUT BOX CENTERED */}
-          <div style={{ minWidth: '300px' }}>
+          <div style={{ minWidth: '300px' }}> // start quiz button stuff
             {!gameStarted ? (
               <button 
                 onClick={() => setGameStarted(true)} 
@@ -254,7 +254,7 @@ export default function CountdownTrivia({ user, onScoreUpdate, onRegisterWithSco
         </div>
       </div>
 
-      {isGameOver && (
+      {isGameOver && ( // endgame stuff like time remaining and register button if user is logged out
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(14,14,14,0.88)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
