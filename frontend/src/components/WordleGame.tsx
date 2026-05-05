@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { getUserRank } from './LeaderboardDatabase';
 import type { User } from '../types';
 
-const [showHint, setShowHint] = useState(false);
 
 const WORDS = [
   'aback','abase','abash','abate','abbey','abbot','abhor','abide','abler','abode',
@@ -204,6 +203,7 @@ interface WordleGameProps {
 }
 
 export default function WordleGame({ user, onScoreUpdate, onNavigate, onRegisterWithScore }: WordleGameProps) {
+  const [showHint, setShowHint] = useState(false);
   const [answer, setAnswer]         = useState(pickRandom);
   const [guesses, setGuesses]       = useState<TileResult[][]>([]);
   const [current, setCurrent]       = useState('');
