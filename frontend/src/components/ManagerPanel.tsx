@@ -2,10 +2,12 @@ import { useState } from "react";
 import type { User } from "../types";
 import { getAllPuzzles as initialPuzzles } from "./PuzzleDatabase";
 
+// set up page links
 interface ManagerPanelProps {
   user: User | null;
 }
 
+// clickable button that tracks isArchived boolean for each game
 export default function ManagerPanel({ user }: ManagerPanelProps) {
   const [puzzles, setPuzzles] = useState(initialPuzzles);
 
@@ -15,6 +17,7 @@ export default function ManagerPanel({ user }: ManagerPanelProps) {
     );
   };
 
+  // returns page
   return (
     <>
       {puzzles.map((p) => (
