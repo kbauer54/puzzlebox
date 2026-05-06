@@ -1,8 +1,10 @@
+// Imports from react, leaderboard ranks from LeaderboardDatabase, 
+// and TypeScript type for a registered user
 import { useState, useEffect, useCallback } from 'react';
 import { getUserRank } from './LeaderboardDatabase';
 import type { User } from '../types';
 
-
+// Word bank used for wordle game
 const WORDS = [
   'aback','abase','abash','abate','abbey','abbot','abhor','abide','abler','abode',
   'abort','about','above','abuse','abyss','acids','acorn','acres','acted','acute',
@@ -149,21 +151,29 @@ const WORDS = [
   'wordy','woven','yappy','yawny','yenta','yodel','yokel','yucky','yummy','zincy',
 ];
 
+// Type definitions
+// TileState: all the states a letter tile can be
 type TileState = 'correct' | 'present' | 'absent' | 'filled' | 'empty';
+// GameStatus: all the statuses the game can be in
 type GameStatus = 'playing' | 'won' | 'lost';
+// TileResult: a tile's letter plus its state
 interface TileResult { letter: string; state: TileState; }
 
+// Setting constants for wordle
 const WORD_LENGTH  = 5;
 const MAX_GUESSES  = 6;
 const WIN_MESSAGES = ['Genius!', 'Magnificent!', 'Impressive!', 'Splendid!', 'Great!', 'Phew!'];
+// Score map is points awarded per guess count
 const SCORE_MAP: Record<number, number> = { 1: 600, 2: 500, 3: 400, 4: 300, 5: 200, 6: 100 };
 
+// Setting rows for the on-screen keyboard
 const KEYBOARD_ROWS = [
   ['Q','W','E','R','T','Y','U','I','O','P'],
   ['A','S','D','F','G','H','J','K','L'],
   ['ENTER','Z','X','C','V','B','N','M','⌫'],
 ];
 
+// Tile coloring for each state
 const TILE_BG: Record<TileState, string> = {
   correct: '#538d4e', present: '#b59f3b', absent: '#3a3a3c', filled: 'transparent', empty: 'transparent',
 };
@@ -174,18 +184,27 @@ const KEY_BG: Record<string, string> = {
   correct: '#538d4e', present: '#b59f3b', absent: '#3a3a3c',
 };
 
+// Pick a random word from the word bank to be the correct answer
 function pickRandom(): string {
   return WORDS[Math.floor(Math.random() * WORDS.length)].toUpperCase();
 }
 
+// This is a two-pass algorithm: marks correct (green),
+// marks present (yellow), and also prevents double-counting duplicate letters
 function evaluateGuess(guess: string, answer: string): TileResult[] {
+  // Start by assuming every tile is absent (grey), then upgrade status below
   const result: TileResult[] = Array.from({ length: WORD_LENGTH }, (_, i) => ({
     letter: guess[i], state: 'absent' as TileState,
   }));
+  // Consume letters as we match them so duplicate letters don't get double-counted
+  // For example if the answer is CRANE and the player guesses EERIE, we only want to mark one
+  // of the 'E' letters yellow/green
   const remaining = answer.split('');
+  // First pass: find green letters
   for (let i = 0; i < WORD_LENGTH; i++) {
     if (guess[i] === answer[i]) { result[i].state = 'correct'; remaining[i] = ''; }
   }
+  // Second pass: find yellow letters, skip letters already marked green
   for (let i = 0; i < WORD_LENGTH; i++) {
     if (result[i].state === 'correct') continue;
     const idx = remaining.indexOf(guess[i]);
@@ -194,29 +213,30 @@ function evaluateGuess(guess: string, answer: string): TileResult[] {
   return result;
 }
 
+
 interface WordleGameProps {
-  user: User | null;
-  onScoreUpdate?: (score: number) => void;
-  onNavigate: (page: string) => void;
-  /** Called when a guest clicks Register after winning — passes the score so it can be saved immediately on account creation */
-  onRegisterWithScore: (score: number, puzzleId: string) => void;
+  user: User | null; // null if user is a guest
+  onScoreUpdate?: (score: number) => void; // saves score when registered user wins
+  onNavigate: (page: string) => void; // switches pages
+  onRegisterWithScore: (score: number, puzzleId: string) => void; // opens the register page and saves score when a user registers
 }
 
 export default function WordleGame({ user, onScoreUpdate, onNavigate, onRegisterWithScore }: WordleGameProps) {
-  const [showHint, setShowHint] = useState(false);
-  const [answer, setAnswer]         = useState(pickRandom);
-  const [guesses, setGuesses]       = useState<TileResult[][]>([]);
-  const [current, setCurrent]       = useState('');
-  const [status, setStatus]         = useState<GameStatus>('playing');
-  const [revealRow, setRevealRow]   = useState<number | null>(null);
-  const [shakeRow, setShakeRow]     = useState(false);
-  const [toast, setToast]           = useState('');
-  const [finalScore, setFinalScore] = useState(0);
-  const [userRank, setUserRank]     = useState<number | null>(null);
+  // State Variables:
+  const [showHint, setShowHint]     = useState(false);                  // toggles the hint answer
+  const [answer, setAnswer]         = useState(pickRandom);             // the target word, set once on load by calling pickRandom
+  const [guesses, setGuesses]       = useState<TileResult[][]>([]);     // 2D array: each row is an array of 5 tile results
+  const [current, setCurrent]       = useState('');                     // The letters typed so far in the active row (not yet submitted by user)
+  const [status, setStatus]         = useState<GameStatus>('playing');  // controls what the game renders (board or end panel)
+  const [revealRow, setRevealRow]   = useState<number | null>(null);    // tells the grid which row to animate the flip on
+  const [shakeRow, setShakeRow]     = useState(false);                  // triggers the shake animation on the current row
+  const [toast, setToast]           = useState('');                     // the popout message text (example: "Not in word list")
+  const [finalScore, setFinalScore] = useState(0);                      // stored for the end panel display
+  const [userRank, setUserRank]     = useState<number | null>(null);    
+  const isGuest = !user;                                                // true if no user is logged in
 
-  const isGuest = !user;
-
-  // If the user registers after winning, fetch their rank immediately
+  // Runs when guest user wins, then registers
+  // fetch and display user rank without page reload
   useEffect(() => {
     if (user && status === 'won' && userRank === null) {
       const rank = getUserRank(user.uid, 'wordle');
@@ -224,10 +244,13 @@ export default function WordleGame({ user, onScoreUpdate, onNavigate, onRegister
     }
   }, [user, status, userRank]);
 
+  // Set the toast message, then clear it after 1800ms
   const showToast = (msg: string, ms = 1800) => {
     setToast(msg); setTimeout(() => setToast(''), ms);
   };
 
+  // Builds a map of each letter to its best state (correct > present > absent)
+  // used to color the on-screen keyboard keys after each guess
   const keyStates = guesses.reduce<Record<string, TileState>>((acc, row) => {
     row.forEach(({ letter, state }) => {
       const prev = acc[letter];
@@ -238,6 +261,8 @@ export default function WordleGame({ user, onScoreUpdate, onNavigate, onRegister
     return acc;
   }, {});
 
+  // Validates the current guess, evaluates it against the answer,
+  // triggers flip animation, then checks for win or loss
   const submitGuess = useCallback(() => {
     if (current.length !== WORD_LENGTH) {
       setShakeRow(true); setTimeout(() => setShakeRow(false), 500);
@@ -251,7 +276,7 @@ export default function WordleGame({ user, onScoreUpdate, onNavigate, onRegister
     const result     = evaluateGuess(current, answer);
     const newGuesses = [...guesses, result];
     setGuesses(newGuesses);
-    setRevealRow(newGuesses.length - 1);
+    setRevealRow(newGuesses.length - 1); // trigger flip animation on this row
     setCurrent('');
 
     const won = result.every(t => t.state === 'correct');
@@ -259,6 +284,7 @@ export default function WordleGame({ user, onScoreUpdate, onNavigate, onRegister
     if (won) {
       const score = SCORE_MAP[newGuesses.length] ?? 100;
       setFinalScore(score);
+      // wait for flip animation to finish before showing end panel
       setTimeout(() => {
         setStatus('won');
         showToast(WIN_MESSAGES[newGuesses.length - 1] ?? 'Nice!', 2000);
@@ -270,6 +296,7 @@ export default function WordleGame({ user, onScoreUpdate, onNavigate, onRegister
         }
       }, WORD_LENGTH * 350 + 300);
     } else if (newGuesses.length >= MAX_GUESSES) {
+      // out of guesses, reveal the answer
       setTimeout(() => {
         setStatus('lost');
         showToast(answer, 3500);
@@ -277,6 +304,8 @@ export default function WordleGame({ user, onScoreUpdate, onNavigate, onRegister
     }
   }, [current, guesses, answer, isGuest, user, onScoreUpdate]);
 
+  // Routes keyboard input to submit, backspace, or letter entry
+  // regex ensures only single letters are accepted
   const handleKey = useCallback((key: string) => {
     if (status !== 'playing') return;
     if (key === 'ENTER')                                           { submitGuess(); }
@@ -284,6 +313,8 @@ export default function WordleGame({ user, onScoreUpdate, onNavigate, onRegister
     else if (/^[A-Z]$/.test(key) && current.length < WORD_LENGTH) { setCurrent(g => g + key); }
   }, [status, current, submitGuess]);
 
+  // Attaches physical keyboard listener to handleKey
+  // cleanup function removes the listener on unmount to prevent duplicates
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -293,6 +324,7 @@ export default function WordleGame({ user, onScoreUpdate, onNavigate, onRegister
     return () => window.removeEventListener('keydown', handler);
   }, [handleKey]);
 
+  // Resets all state back to initial values and picks a new random word
   const reset = () => {
     setAnswer(pickRandom()); setGuesses([]); setCurrent('');
     setStatus('playing'); setRevealRow(null); setToast('');
@@ -429,13 +461,16 @@ export default function WordleGame({ user, onScoreUpdate, onNavigate, onRegister
         )}
       </div>
 
+      {/* CSS animations */}
       <style>{`
+        /* Tile Flip: rotates to -90deg (hidden), color swaps, then rotates back */
         @keyframes wFlip {
           0%   { transform: rotateX(0deg); }
           49%  { transform: rotateX(-90deg); }
           50%  { transform: rotateX(-90deg); }
           100% { transform: rotateX(0deg); }
         }
+        /* Row Shake: rapid left-right movement for invalid guesses */
         @keyframes wShake {
           0%, 100% { transform: translateX(0); }
           15%      { transform: translateX(-5px); }

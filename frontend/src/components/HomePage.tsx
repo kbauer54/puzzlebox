@@ -29,7 +29,7 @@ export default function HomePage({ onNavigate, user }: HomePageProps) {
   return (
     <main style={s.page} className="fade-up">
 
-      {/* ── Hero ── */}
+      {/* -- Hero Section -- */}
       <section style={s.hero}>
         <h1 style={s.heroTitle}>
           Play. <em style={s.heroEm}>Solve.</em><br />Repeat.
@@ -40,11 +40,11 @@ export default function HomePage({ onNavigate, user }: HomePageProps) {
         </p>
         <div style={s.heroButtons}>
           <button style={s.btnPrimary} onClick={quickPlay}>
-            ⚡ Quick Play
+            Quick Play
           </button>
           {!user && (
             <button style={s.btnGhost} onClick={() => onNavigate('register')}>
-              Register — It's Free
+              Register - It's Free
             </button>
           )}
         </div>
@@ -52,7 +52,7 @@ export default function HomePage({ onNavigate, user }: HomePageProps) {
 
       <div style={s.divider} />
 
-      {/* ── Featured Puzzle ── */}
+      {/* -- Featured Puzzle -- */}
       {featured && (
         <section style={{ marginBottom: 32 }}>
           <div style={s.featuredCard}>
@@ -80,7 +80,7 @@ export default function HomePage({ onNavigate, user }: HomePageProps) {
         </section>
       )}
 
-      {/* ── Today's Games ── */}
+      {/* -- Today's Games -- */}
       <section>
         <p style={{ ...s.sectionLabel, marginBottom: 16 }}>Today's Puzzles</p>
         <div style={s.gameGrid}>
